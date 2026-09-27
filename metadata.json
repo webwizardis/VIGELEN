@@ -1,0 +1,8 @@
+{
+  "name": "Remix VIGILEN - Financial Risk Intelligence",
+  "description": "Financial risk intelligence platform for detecting fraudulent investment content, social media scam patterns, and transaction anomalies for retail investor protection.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
