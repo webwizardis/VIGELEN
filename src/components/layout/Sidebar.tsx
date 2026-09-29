@@ -155,13 +155,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </div>
 
-        {/* Bottom Analyst Identification */}
-        <div className="nav-section border-t border-[#e4e4e7] pt-6 mt-6">
-          <div className="mono text-[#71717a]">Authenticated As</div>
-          <div className="text-[0.85rem] font-semibold text-[#1a1a1a] mt-1 tracking-tight">
-            DIYA J. [ANALYST]
-          </div>
-          <div className="mt-3 flex items-center gap-4 text-xs">
+        {/* Bottom Navigation Links */}
+        <div className="nav-section border-t border-[#e4e4e7] pt-4 mt-6">
+          <div className="flex items-center gap-4 text-xs">
             <button
               onClick={() => handleSelectTab('settings')}
               className={`mono transition-colors cursor-pointer ${
