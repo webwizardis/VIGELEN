@@ -27,8 +27,8 @@ export const NAV_TAB_LIST: NavTabMeta[] = [
   { id: 'landing', label: 'Platform Overview', shortLabel: 'Overview', category: 'Operations' },
   { id: 'scam-detector', label: 'Investment Content', shortLabel: 'Content Scan', category: 'Core Screening' },
   { id: 'transaction-security', label: 'Transaction Security', shortLabel: 'Transactions', category: 'Core Screening' },
-  { id: 'risk-profile', label: 'Investor Risk Profile', shortLabel: 'Risk Profile', category: 'Core Screening' },
-  { id: 'safety-center', label: 'Safety Center', shortLabel: 'Safety', category: 'Core Screening' },
+  { id: 'risk-profile', label: 'Investor Risk Profile', shortLabel: 'Risk Profile', category: 'Investor Protection' },
+  { id: 'safety-center', label: 'Safety Center', shortLabel: 'Safety', category: 'Investor Protection' },
   { id: 'cases', label: 'Case Management', shortLabel: 'Casebook', category: 'Intelligence & Cases' },
   { id: 'reports', label: 'Audit Reports', shortLabel: 'Reports', category: 'Intelligence & Cases' },
   { id: 'unified-risk', label: 'Unified Risk Model', shortLabel: 'Unified Model', category: 'Intelligence & Cases' },
@@ -65,6 +65,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'scam-detector' as NavTabId, label: 'Investment Content' },
         { id: 'transaction-security' as NavTabId, label: 'Transaction Security' },
+      ],
+    },
+    {
+      title: 'Investor Protection',
+      items: [
         { id: 'risk-profile' as NavTabId, label: 'Investor Risk Profile' },
         { id: 'safety-center' as NavTabId, label: 'Safety Center' },
       ],

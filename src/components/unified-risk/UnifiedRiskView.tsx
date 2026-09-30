@@ -18,6 +18,7 @@ interface UnifiedRiskViewProps {
   initialTransactionRisk?: number;
   initialBehavioralRisk?: number;
   initialInvestorRisk?: number;
+  onNavigateToRiskProfile?: () => void;
 }
 
 export const UnifiedRiskView: React.FC<UnifiedRiskViewProps> = ({
@@ -25,12 +26,17 @@ export const UnifiedRiskView: React.FC<UnifiedRiskViewProps> = ({
   initialTransactionRisk = 82,
   initialBehavioralRisk = 78,
   initialInvestorRisk = 70,
+  onNavigateToRiskProfile,
 }) => {
   // Inputs (Section 14): Content Risk, Transaction Risk, Behavioral Risk, Investor Risk
   const [contentRisk, setContentRisk] = useState(initialContentRisk);
   const [transactionRisk, setTransactionRisk] = useState(initialTransactionRisk);
   const [behavioralRisk, setBehavioralRisk] = useState(initialBehavioralRisk);
   const [investorRisk, setInvestorRisk] = useState(initialInvestorRisk);
+
+  React.useEffect(() => {
+    setInvestorRisk(initialInvestorRisk);
+  }, [initialInvestorRisk]);
 
   // Configurable Weights
   const [weights, setWeights] = useState<UnifiedRiskWeights>({
@@ -323,7 +329,18 @@ export const UnifiedRiskView: React.FC<UnifiedRiskViewProps> = ({
             <div className="rounded-lg bg-slate-50 p-4 border border-slate-100 space-y-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-slate-900">4. Investor Risk Profile</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-900">4. Investor Risk Profile</span>
+                    {onNavigateToRiskProfile && (
+                      <button
+                        type="button"
+                        onClick={onNavigateToRiskProfile}
+                        className="mono text-[10px] text-indigo-700 underline font-bold cursor-pointer hover:text-indigo-900"
+                      >
+                        [Open Risk Profile Tab →]
+                      </button>
+                    )}
+                  </div>
                   <p className="text-[11px] text-slate-500">Retail experience level and verification habits</p>
                 </div>
                 <div className="text-right">

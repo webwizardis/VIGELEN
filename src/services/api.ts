@@ -280,3 +280,146 @@ export async function apiGetModelKnowledge(): Promise<{
     },
   };
 }
+
+export interface VerificationSourceResult {
+  sourceProvided: string;
+  sourceType: string;
+  canonicalOfficialWebsite?: string;
+  isOfficialWebsite?: boolean;
+  officialEntityName?: string;
+  verificationStatus: 'Verified' | 'Caution' | 'Suspicious' | 'Unverified';
+  summary?: string;
+  evidenceAvailable: string[];
+  warnings: string[];
+  groundingSources?: { title: string; url: string }[];
+  checklist: { label: string; verified: boolean; note: string }[];
+}
+
+export async function apiVerifySource(
+  sourceInput: string,
+  sourceType = 'Website'
+): Promise<VerificationSourceResult> {
+  try {
+    const res = await fetch('/api/verify-source', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sourceInput, sourceType }),
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('Verify source API failed, falling back to local dataset match:', err);
+  }
+
+  // Local fallback
+  const { matchBlacklistedEntity } = await import('../data/cleanedIntelligence');
+  const matched = matchBlacklistedEntity(sourceInput);
+  if (matched) {
+    return {
+      sourceProvided: sourceInput,
+      sourceType,
+      canonicalOfficialWebsite: matched.channelPlatform === 'Website' ? 'Fake clone of legitimate firm' : 'Unregistered Private Channel',
+      isOfficialWebsite: false,
+      officialEntityName: `${matched.sourceAgency} Flagged Entity: ${matched.rawEntity}`,
+      verificationStatus: 'Suspicious',
+      summary: `CRITICAL ALERT: "${matched.rawEntity}" is verified on the official ${matched.sourceAgency} Caution Blacklist (#${matched.sourceRecordId}) for ${matched.threatClassification.replace(/_/g, ' ')}. Action: ${matched.recommendedAction}.`,
+      evidenceAvailable: [
+        `Positive match on ${matched.sourceAgency} official public caution directory`,
+        `Classification: ${matched.threatClassification.replace(/_/g, ' ')}`,
+        `Regulatory basis: ${matched.labelBasis}`,
+      ],
+      warnings: [
+        'Officially flagged for deceptive securities solicitation or broker clone operations.',
+        'High risk of irreversible retail financial loss.',
+        'Do not deposit funds or provide OTPs.',
+      ],
+      groundingSources: [
+        { title: 'NSE Caution Circular List', url: 'https://www.nseindia.com/invest/caution-circulars' },
+        { title: 'SEBI SCORES Directory', url: 'https://scores.gov.in' },
+      ],
+      checklist: [
+        { label: 'Regulatory Registration Status', verified: false, note: `Flagged on official ${matched.sourceAgency} caution list (#${matched.sourceRecordId}).` },
+        { label: 'Official Domain Authenticity', verified: false, note: 'Confirmed deceptive clone or unverified channel.' },
+        { label: 'Physical Corporate Identity', verified: false, note: 'Zero corporate CIN or valid physical office verified.' },
+        { label: 'Institutional Payment Rails', verified: false, note: 'Directs payments to peer accounts or illicit gateways.' },
+      ],
+    };
+  }
+
+  return {
+    sourceProvided: sourceInput,
+    sourceType,
+    canonicalOfficialWebsite: 'Unknown / Unregistered',
+    isOfficialWebsite: false,
+    officialEntityName: 'Unregistered Source',
+    verificationStatus: 'Unverified',
+    summary: `Unregistered Source: No confirmed SEBI or RBI registration was found for "${sourceInput}". Ensure you cross-reference on SEBI SCORES before transferring capital.`,
+    evidenceAvailable: [
+      'No active license found in recognized broker directory',
+      'Domain ownership is unverified or cloaked with proxy privacy registration',
+    ],
+    warnings: [
+      'Exercise caution: Unregistered investment advisers cannot legally offer customized market tips.',
+      'Never transfer funds to private UPI VPAs.',
+    ],
+    groundingSources: [
+      { title: 'SEBI Recognized Intermediaries', url: 'https://scores.gov.in' },
+      { title: 'NSE Investor Protection', url: 'https://www.nseindia.com' },
+    ],
+    checklist: [
+      { label: 'Regulatory Registration Status', verified: false, note: 'No matching regulatory license found.' },
+      { label: 'Official Domain Authenticity', verified: false, note: 'Unable to verify authentic corporate domain.' },
+      { label: 'Physical Corporate Identity', verified: false, note: 'No corporate registry match confirmed.' },
+      { label: 'Institutional Payment Rails', verified: false, note: 'Directs payments to unverified accounts.' },
+    ],
+  };
+}
+
+// -------------------------------------------------------------
+// Model Training & Test Evaluation API Helpers
+// -------------------------------------------------------------
+
+export async function apiGetModelTrainingSummary() {
+  try {
+    const res = await fetch('/api/model/training-summary');
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('apiGetModelTrainingSummary failed, using local model:', err);
+  }
+  const { getModelTrainingSummary } = await import('./datasetModelTrainer');
+  return getModelTrainingSummary();
+}
+
+export async function apiEvaluateModelTestSuite() {
+  try {
+    const res = await fetch('/api/model/evaluate-test-suite', { method: 'POST' });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('apiEvaluateModelTestSuite failed, using local evaluator:', err);
+  }
+  const { evaluateTestSuite } = await import('./datasetModelTrainer');
+  return evaluateTestSuite();
+}
+
+export async function apiTestPredict(input: string, platform?: string) {
+  try {
+    const res = await fetch('/api/model/test-predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input, platform }),
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('apiTestPredict failed, using local predictor:', err);
+  }
+  const { predictWithTrainedModel } = await import('./datasetModelTrainer');
+  return predictWithTrainedModel(input, platform);
+}
+

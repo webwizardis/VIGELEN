@@ -77,14 +77,14 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
     {
       title: 'Investor Risk Profile',
       subtitle: 'Evaluate susceptibility factors & defensive thresholds',
-      category: 'Core Screening',
+      category: 'Investor Protection',
       tab: 'risk-profile' as NavTabId,
       icon: <ShieldCheck className="h-4 w-4 text-[#2563eb]" />,
     },
     {
       title: 'Safety Center',
       subtitle: 'Broker verification & official registry lookups',
-      category: 'Core Screening',
+      category: 'Investor Protection',
       tab: 'safety-center' as NavTabId,
       icon: <ShieldCheck className="h-4 w-4 text-[#2563eb]" />,
     },
@@ -150,6 +150,13 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && filtered.length > 0) {
+                e.preventDefault();
+                onNavigate(filtered[0].tab);
+                onClose();
+              }
+            }}
             placeholder="Type command, module, or investigation search..."
             className="flex-1 bg-transparent text-sm text-[#1a1a1a] placeholder:text-[#71717a] font-sans focus:outline-hidden"
           />

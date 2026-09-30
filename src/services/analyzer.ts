@@ -10,6 +10,7 @@ import {
   MatchedRegulatoryRecord,
 } from '../types';
 import { matchBlacklistedEntity, RegulatoryIntelligenceRecord } from '../data/cleanedIntelligence';
+import { predictWithTrainedModel } from './datasetModelTrainer';
 
 export function determineRiskLevel(score: number): RiskLevel {
   if (score >= 80) return 'CRITICAL';
@@ -250,7 +251,29 @@ export function analyzeTextContent(text: string, inputType: 'text' | 'screenshot
     signals.push({ label: 'Contains verified regulatory disclosure', impact: 25, direction: 'decreases_risk' });
   }
 
-  const finalScore = Math.min(100, Math.max(5, score));
+  // 7. Dataset-Trained Statistical Model Inference (Trained on 278 Regulatory Records)
+  const trainedModelInference = predictWithTrainedModel(text);
+  if (trainedModelInference.activatedFeatures.length > 0 && !matchedRecord) {
+    indicators.push({
+      id: 'ind-dataset-trained-features',
+      category: 'MODEL_PREDICTION',
+      label: 'Dataset-Trained Model Classification',
+      description: `Supervised model trained on regulatory intelligence dataset classified as ${trainedModelInference.predictedClass.replace(/_/g, ' ')} with ${Math.round(trainedModelInference.confidence * 100)}% confidence (${trainedModelInference.activatedFeatures.slice(0, 2).join('; ')})`,
+      severity: trainedModelInference.riskScore >= 75 ? 'critical' : trainedModelInference.riskScore >= 45 ? 'high' : 'medium',
+      confidence: trainedModelInference.confidence,
+      highlightText: text.slice(0, 50),
+      contributionScore: Math.round(trainedModelInference.riskScore * 0.35),
+    });
+    signals.push({
+      label: `Dataset-trained model score: ${trainedModelInference.riskScore}/100 (${trainedModelInference.activatedFeatures[0] || 'Trained weights'})`,
+      impact: Math.round(trainedModelInference.riskScore * 0.35),
+      direction: trainedModelInference.riskScore >= 50 ? 'increases_risk' : 'decreases_risk',
+    });
+  }
+
+  const finalScore = matchedRecord
+    ? 100
+    : Math.min(100, Math.max(5, Math.round((trainedModelInference.riskScore * 0.55) + (score * 0.45))));
   const riskLevel = determineRiskLevel(finalScore);
 
   let classification = 'Potentially Suspicious Investment Content';
@@ -513,7 +536,7 @@ export function calculateUnifiedRisk(
   if (combinedRisk >= 80) {
     recommendation = 'CRITICAL ALERT: Cease immediate capital transfer. High-confidence multi-vector fraud indicators across promotional content, transaction deviations, and investor exposure.';
   } else if (combinedRisk >= 60) {
-    recommendation = 'ELEVATED RISK: Impose 24-hour step-up biometric re-authentication and mandate third-party regulatory registry verification before funds release.';
+    recommendation = 'ELEVATED RISK: Impose 24-hour step-up biometric re-authentication and mandate third-party statutory licensing verification before funds release.';
   } else if (combinedRisk >= 35) {
     recommendation = 'MODERATE CAUTION: Present in-app educational friction warning regarding unverified investment advice.';
   }

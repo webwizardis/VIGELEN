@@ -16,6 +16,9 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
+  Maximize2,
+  Eye,
+  ShieldCheck,
 } from 'lucide-react';
 import { TextAnalysisResult, DetectedIndicator } from '../../types';
 import { SAMPLE_INVESTMENT_TEXTS, SAMPLE_SCREENSHOTS } from '../../data/mockData';
@@ -48,6 +51,7 @@ export const ScamDetectorView: React.FC<ScamDetectorViewProps> = ({
   const [analyzingImage, setAnalyzingImage] = useState(false);
   const [imageResult, setImageResult] = useState<TextAnalysisResult | null>(null);
   const [uploadedImagePreview, setUploadedImagePreview] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
 
   // Verification Checklist State
@@ -80,9 +84,16 @@ export const ScamDetectorView: React.FC<ScamDetectorViewProps> = ({
     setAnalyzingImage(true);
     try {
       const sample = sampleData || selectedScreenshotSample;
-      const result = await apiAnalyzeImage(sample.previewUrl, sample.name, isDemoMode);
-      result.inputText = sample.extractedText;
-      setImageResult(result);
+      if (uploadedImagePreview) {
+        const result = await apiAnalyzeImage(uploadedImagePreview, 'uploaded_screenshot.png', isDemoMode);
+        setImageResult(result);
+      } else {
+        // Run OCR text analysis using the dataset-trained model
+        const result = await apiAnalyzeText(sample.extractedText, isDemoMode);
+        result.inputType = 'screenshot';
+        result.inputText = sample.extractedText;
+        setImageResult(result);
+      }
     } catch (err) {
       console.error('Failed to analyze screenshot:', err);
     } finally {
@@ -233,93 +244,227 @@ export const ScamDetectorView: React.FC<ScamDetectorViewProps> = ({
       {/* TAB 2: IMAGE WORKFLOW (Section 11) */}
       {activeTab === 'image' && (
         <div className="space-y-6">
-          {/* Preset Screenshots */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500">
-              Sample Screenshots:
-            </span>
-            {SAMPLE_SCREENSHOTS.map((sample) => (
-              <button
-                key={sample.id}
-                onClick={() => {
-                  setSelectedScreenshotSample(sample);
-                  setUploadedImagePreview(null);
-                  setImageResult(null);
-                }}
-                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
-                  selectedScreenshotSample.id === sample.id && !uploadedImagePreview
-                    ? 'border-[#1a1a1a] bg-[#1a1a1a] font-bold text-white shadow-2xs'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-[#1a1a1a]'
-                }`}
-              >
-                {sample.name}
-              </button>
-            ))}
+          {/* Sensible Screenshots Preset Gallery */}
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="mono text-xs font-bold text-[#1a1a1a] uppercase tracking-wider">
+                  Sensible Real-World Forensic Screenshots
+                </h3>
+                <p className="text-xs text-[#71717a] mt-0.5">
+                  High-fidelity social and mobile captures demonstrating authentic investment scam vectors vs regulated broker disclosures.
+                </p>
+              </div>
+              <span className="mono text-[10px] bg-[#f4f4f5] border border-[#e4e4e7] px-2 py-0.5">
+                4 PRESET CASES AVAILABLE
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {SAMPLE_SCREENSHOTS.map((sample) => {
+                const isSelected = selectedScreenshotSample.id === sample.id && !uploadedImagePreview;
+                return (
+                  <div
+                    key={sample.id}
+                    onClick={() => {
+                      setSelectedScreenshotSample(sample);
+                      setUploadedImagePreview(null);
+                      setImageResult(null);
+                    }}
+                    className={`border transition-all cursor-pointer bg-white overflow-hidden flex flex-col justify-between ${
+                      isSelected
+                        ? 'border-[#1a1a1a] shadow-sm ring-1 ring-[#1a1a1a]'
+                        : 'border-[#e4e4e7] hover:border-[#1a1a1a]/60'
+                    }`}
+                  >
+                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-900">
+                      <img
+                        src={sample.previewUrl}
+                        alt={sample.name}
+                        referrerPolicy="no-referrer"
+                        className="h-full w-full object-cover object-top hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-2 left-2">
+                        <span className="mono text-[9px] font-bold bg-[#1a1a1a]/90 text-white px-2 py-0.5 uppercase backdrop-blur-xs">
+                          {sample.channel}
+                        </span>
+                      </div>
+                      <div className="absolute top-2 right-2">
+                        <span
+                          className={`mono text-[9px] font-bold px-1.5 py-0.5 border ${
+                            sample.simulatedRisk >= 75
+                              ? 'bg-[#be123c] text-white border-[#be123c]'
+                              : 'bg-[#10b981] text-white border-[#10b981]'
+                          }`}
+                        >
+                          {sample.simulatedRisk}/100
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
+                      <div>
+                        <div className="font-bold text-xs text-[#1a1a1a] leading-snug">
+                          {sample.name}
+                        </div>
+                        <p className="text-[11px] text-[#71717a] mt-1 line-clamp-2">
+                          {sample.claim}
+                        </p>
+                      </div>
+
+                      <div className="pt-2 border-t border-[#f4f4f5] flex items-center justify-between">
+                        <span className="mono text-[10px] text-[#71717a]">
+                          {isSelected ? '● Selected' : 'Click to inspect'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedScreenshotSample(sample);
+                            setUploadedImagePreview(null);
+                            handleAnalyzeScreenshot(sample);
+                          }}
+                          className="mono text-[10px] font-bold text-[#1a1a1a] hover:underline"
+                        >
+                          Scan Now →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Screenshot Upload Workspace */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Upload Area */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
-                  Upload Social Media Screenshot
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  Supported formats: PNG, JPG, WEBP. Text will be extracted and analyzed automatically.
-                </p>
+          {/* Screenshot Inspection & Upload Workspace */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            {/* Left: Metadata & Upload Control (5 cols) */}
+            <div className="lg:col-span-5 border border-[#1a1a1a] bg-white p-5 shadow-sm flex flex-col justify-between space-y-4">
+              <div className="space-y-4">
+                <div className="border-b border-[#e4e4e7] pb-3">
+                  <div className="flex items-center justify-between">
+                    <span className="mono text-[10px] text-[#71717a] uppercase font-bold">
+                      Selected Sample Details
+                    </span>
+                    <span className="mono text-[10px] bg-[#f4f4f5] border border-[#e4e4e7] px-2 py-0.5">
+                      {selectedScreenshotSample.channel}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-bold text-[#1a1a1a] mt-1">
+                    {uploadedImagePreview ? 'Custom Uploaded Screenshot' : selectedScreenshotSample.name}
+                  </h4>
+                  <p className="text-xs text-[#71717a] mt-0.5">
+                    {uploadedImagePreview
+                      ? 'Custom file will be analyzed using OCR extraction and VIGILEN model scoring.'
+                      : selectedScreenshotSample.threatType}
+                  </p>
+                </div>
 
-                <div className="mt-4 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-6 text-center transition-colors hover:bg-slate-100 relative">
-                  <Upload className="h-8 w-8 text-[#1a1a1a] mb-2" />
-                  <p className="text-xs font-bold text-slate-900">
-                    Click to select screenshot or drag and drop
-                  </p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    PNG, JPG, or WEBP (Max 10MB)
-                  </p>
-                  <input
-                    type="file"
-                    accept="image/png, image/jpeg, image/webp"
-                    onChange={handleFileUpload}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
+                {/* OCR Text Box */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="mono text-[10px] text-[#71717a] uppercase font-bold">
+                      Extracted Text / OCR Transcription
+                    </span>
+                    <span className="mono text-[9px] text-[#10b981] font-bold">
+                      READY FOR MODEL
+                    </span>
+                  </div>
+                  <div className="p-3 bg-[#fdfdfc] border border-[#e4e4e7] font-mono text-[11px] text-[#1a1a1a] max-h-36 overflow-y-auto leading-relaxed">
+                    {uploadedImagePreview
+                      ? 'Custom screenshot image loaded. Click "Analyze Screenshot" to extract text and evaluate.'
+                      : selectedScreenshotSample.extractedText}
+                  </div>
+                </div>
+
+                {/* Custom File Upload Option */}
+                <div>
+                  <span className="mono text-[10px] text-[#71717a] uppercase font-bold block mb-1.5">
+                    Or Upload Custom Screenshot
+                  </span>
+                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-[#e4e4e7] bg-[#fdfdfc] p-4 text-center transition-colors hover:border-[#1a1a1a] relative">
+                    <Upload className="h-5 w-5 text-[#1a1a1a] mb-1.5" />
+                    <p className="text-xs font-semibold text-[#1a1a1a]">
+                      Drop image or browse device
+                    </p>
+                    <p className="text-[10px] text-[#71717a] mt-0.5">
+                      PNG, JPG, or WEBP (Max 10MB)
+                    </p>
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/webp"
+                      onChange={handleFileUpload}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-[11px] text-slate-500">
-                  {uploadedImagePreview ? 'Custom file loaded' : selectedScreenshotSample.name}
-                </span>
+              <div className="pt-4 border-t border-[#e4e4e7]">
                 <button
+                  type="button"
                   onClick={() => handleAnalyzeScreenshot()}
                   disabled={analyzingImage}
-                  className="inline-flex items-center gap-2 border border-[#1a1a1a] bg-[#1a1a1a] px-5 py-2 text-xs font-bold text-white shadow-xs transition-colors hover:bg-white hover:text-[#1a1a1a] disabled:opacity-50 cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 border border-[#1a1a1a] bg-[#1a1a1a] px-5 py-2.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-white hover:text-[#1a1a1a] disabled:opacity-50 cursor-pointer"
                 >
                   {analyzingImage ? (
                     <RefreshCw className="h-4 w-4 animate-spin" />
                   ) : (
                     <ImageIcon className="h-4 w-4" />
                   )}
-                  <span>{analyzingImage ? 'Extracting & Analyzing...' : 'Analyze Screenshot'}</span>
+                  <span>{analyzingImage ? 'Extracting & Evaluating...' : 'Analyze Screenshot with VIGILEN Engine'}</span>
                 </button>
               </div>
             </div>
 
-            {/* Preview Area */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-3">
-                Screenshot Preview
-              </h3>
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center">
+            {/* Right: High-Res Screenshot Viewer (7 cols) */}
+            <div className="lg:col-span-7 border border-[#1a1a1a] bg-white p-5 shadow-sm space-y-3">
+              <div className="flex items-center justify-between border-b border-[#e4e4e7] pb-2">
+                <div>
+                  <h3 className="mono text-xs font-bold uppercase tracking-wider text-[#1a1a1a]">
+                    Forensic Screenshot Preview
+                  </h3>
+                  <span className="text-[11px] text-[#71717a]">
+                    Digital capture from {uploadedImagePreview ? 'custom upload' : selectedScreenshotSample.channel}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setLightboxImage(uploadedImagePreview || selectedScreenshotSample.previewUrl)}
+                  className="inline-flex items-center gap-1.5 mono text-[10px] border border-[#e4e4e7] px-2.5 py-1 bg-[#fdfdfc] hover:border-[#1a1a1a] cursor-pointer"
+                >
+                  <Maximize2 className="h-3 w-3" />
+                  <span>Expand View</span>
+                </button>
+              </div>
+
+              <div
+                onClick={() => setLightboxImage(uploadedImagePreview || selectedScreenshotSample.previewUrl)}
+                className="relative max-h-[460px] w-full overflow-hidden border border-[#e4e4e7] bg-[#1a1a1a]/5 flex items-center justify-center p-2 cursor-pointer group"
+              >
                 <img
                   src={uploadedImagePreview || selectedScreenshotSample.previewUrl}
-                  alt="Screenshot preview"
-                  className="h-full w-full object-contain"
+                  alt={selectedScreenshotSample.name}
+                  referrerPolicy="no-referrer"
+                  className="max-h-[430px] w-auto max-w-full object-contain shadow-sm group-hover:scale-[1.01] transition-transform duration-200"
                 />
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="mono text-xs bg-[#1a1a1a] text-white px-3 py-1.5 font-bold flex items-center gap-1.5 shadow-md">
+                    <Eye className="h-3.5 w-3.5" />
+                    Click to Open High-Res Fullscreen
+                  </span>
+                </div>
               </div>
-              <p className="mt-2 text-[11px] text-slate-500">
-                Extracted content is converted into structured investment claims.
-              </p>
+
+              <div className="flex items-center justify-between text-[11px] text-[#71717a] pt-1">
+                <span>
+                  Source: <strong>{uploadedImagePreview ? 'User Upload' : selectedScreenshotSample.name}</strong>
+                </span>
+                <span className="mono">
+                  Channel: {uploadedImagePreview ? 'External' : selectedScreenshotSample.channel}
+                </span>
+              </div>
             </div>
           </div>
         </div>

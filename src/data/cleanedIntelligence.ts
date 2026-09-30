@@ -5323,32 +5323,56 @@ export const SEBI_DEMOGRAPHIC_METRICS = REGULATORY_INTELLIGENCE_RECORDS.filter(
 export function matchBlacklistedEntity(input: string): RegulatoryIntelligenceRecord | null {
   if (!input || typeof input !== 'string') return null;
   const cleaned = input.toLowerCase().trim();
+  const stripped = cleaned.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
 
   // 1. Direct match by search token or normalized entity
   for (const item of BLACKLISTED_MALICIOUS_ENTITIES) {
-    const rawLower = item.rawEntity.toLowerCase();
-    const normLower = item.normalizedEntity.toLowerCase();
-    const token = item.searchToken.toLowerCase();
+    const rawLower = item.rawEntity.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
+    const normLower = item.normalizedEntity.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
+    const token = item.searchToken.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
 
     // Check full string inclusions or domain matches
-    if (token.length > 3 && (cleaned.includes(token) || token.includes(cleaned))) {
+    if (token.length > 3 && (cleaned.includes(token) || stripped === token)) {
       return item;
     }
-    if (normLower.length > 3 && cleaned.includes(normLower)) {
+    if (normLower.length > 3 && (cleaned.includes(normLower) || stripped === normLower)) {
       return item;
     }
-    if (rawLower.length > 3 && cleaned.includes(rawLower)) {
+    if (rawLower.length > 3 && (cleaned.includes(rawLower) || stripped === rawLower)) {
       return item;
     }
   }
 
   // 2. Specific app/brand names checking
+  const commonStopWords = new Set([
+    'application',
+    'app',
+    'link',
+    'download',
+    'website',
+    'trade',
+    'https',
+    'http',
+    'html',
+    'org',
+    'com',
+    'net',
+    'install',
+    'user',
+    'page',
+    'index',
+    'trading',
+    'india',
+    'stock',
+    'stocks',
+  ]);
+
   for (const item of BLACKLISTED_MALICIOUS_ENTITIES) {
     if (item.channelPlatform === 'Mobile_App' || item.channelPlatform === 'Android_APK') {
       const cleanName = item.rawEntity.replace(/[^a-zA-Z0-9]/g, ' ').toLowerCase();
-      const words = cleanName.split(/\s+/).filter(w => w.length >= 4);
+      const words = cleanName.split(/\s+/).filter((w) => w.length >= 4);
       for (const w of words) {
-        if (['application', 'app', 'link', 'download', 'website', 'trade'].includes(w)) continue;
+        if (commonStopWords.has(w)) continue;
         const regex = new RegExp(`\\b${w}\\b`, 'i');
         if (regex.test(cleaned)) {
           return item;

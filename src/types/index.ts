@@ -9,7 +9,8 @@ export type IndicatorCategory =
   | 'COMMISSION_PYRAMID'
   | 'IMPERSONATION'
   | 'MISSING_DISCLOSURE'
-  | 'REGULATORY_BLACKLIST';
+  | 'REGULATORY_BLACKLIST'
+  | 'MODEL_PREDICTION';
 
 export interface MatchedRegulatoryRecord {
   id: string;
@@ -262,6 +263,7 @@ export interface InvestigationEvidence {
   summary: string;
   riskScore: number;
   tags: string[];
+  screenshotUrl?: string;
   rawDetails?: Record<string, unknown>;
 }
 

@@ -27,6 +27,7 @@ interface DashboardViewProps {
   onNavigateToReports: () => void;
   onNavigateToLanding?: () => void;
   onNavigateToResearchLab?: () => void;
+  onNavigateToRiskProfile?: () => void;
 }
 
 interface ActivityItem {
@@ -97,6 +98,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateToTransactionSecurity,
   onNavigateToCases,
   onNavigateToResearchLab,
+  onNavigateToRiskProfile,
 }) => {
   const [timeRange, setTimeRange] = useState<'30D' | '14D' | '7D'>('30D');
   const [activeVector, setActiveVector] = useState<'all' | 'content' | 'transaction' | 'behavioral'>('all');
@@ -189,6 +191,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           >
             View Casebook
           </button>
+
+          {onNavigateToRiskProfile && (
+            <button
+              onClick={onNavigateToRiskProfile}
+              className="btn"
+            >
+              Investor Risk Profile
+            </button>
+          )}
         </div>
       </div>
 
@@ -235,14 +246,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="mono text-xs font-bold text-[#1a1a1a] uppercase tracking-wider">
-                  Ground-Truth Regulatory Intelligence (All CSV Data Ingested)
+                  Dataset-Trained Model Intelligence (80/20 Train & Test Partition)
                 </span>
                 <span className="status-pill text-[#10b981] border-[#10b981] text-[0.6rem] py-0.5">
-                  100% INGESTED
+                  MODEL TRAINED & VERIFIED
                 </span>
               </div>
               <p className="text-xs text-[#71717a] mt-0.5">
-                Processed, normalized, and actively indexed inside the Gemini AI prompt context and deterministic NLP rules engine.
+                Dataset contents implemented directly into model feature representations, platform prior log-odds, and 80/20 train/test evaluation.
               </p>
             </div>
           </div>
@@ -253,7 +264,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="mono text-xs border border-[#1a1a1a] px-3 py-1.5 bg-[#ffffff] hover:bg-[#1a1a1a] hover:text-white transition-colors cursor-pointer self-start md:self-auto inline-flex items-center gap-1.5 shrink-0"
             >
               <FileSpreadsheet className="h-3.5 w-3.5" />
-              <span>Explore Cleaned & Raw CSVs</span>
+              <span>Model Training & Test Suite</span>
               <ArrowUpRight className="h-3.5 w-3.5" />
             </button>
           )}

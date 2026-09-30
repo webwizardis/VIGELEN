@@ -7,6 +7,7 @@ import {
   ExternalLink,
   ChevronRight,
   Check,
+  ShieldCheck,
 } from 'lucide-react';
 
 export interface LandingSectionProps {
@@ -51,6 +52,21 @@ export const LandingSection: React.FC<LandingSectionProps> = ({
         'Compares transfer amounts against historical spending percentiles',
         'Detects sudden high-velocity transfers to newly created individual accounts',
         'Highlights off-hours payment requests characteristic of social engineering',
+      ],
+    },
+    {
+      id: 'risk-profile',
+      icon: <ShieldCheck className="h-5 w-5 text-[#1a1a1a]" aria-hidden="true" />,
+      category: 'Investor Protection',
+      heading: 'Investor Risk Profile & Diagnostics',
+      body: 'Evaluates retail investor susceptibility through empirical vulnerability diagnostics, SEBI 2025 demographic benchmarks, and interactive escalation simulators.',
+      caption: 'Diagnostic vulnerability mapping grounded in SEBI 2025 investor survey data',
+      actionText: 'Open Risk Profile',
+      targetId: 'risk-profile',
+      details: [
+        'Interactive 6-point investor vulnerability diagnostic with immediate scoring',
+        'Scam escalation simulator highlighting scammer tactics and intervention checkpoints',
+        'Demographic risk profiles based on official SEBI 2025 investor survey benchmarks',
       ],
     },
     {
@@ -113,8 +129,8 @@ export const LandingSection: React.FC<LandingSectionProps> = ({
         </div>
       </div>
 
-      {/* 3 Metric/Feature Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* 4 Metric/Feature Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {featureCards.map((card) => {
           const isSelected = selectedCardId === card.id;
 

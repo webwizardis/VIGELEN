@@ -34,6 +34,7 @@ export function App() {
   const [cases, setCases] = useState<InvestigationCase[]>(INITIAL_INVESTIGATION_CASES);
   const [selectedCaseId, setSelectedCaseId] = useState<string>(INITIAL_INVESTIGATION_CASES[0]?.id || '');
   const [systemStatus] = useState<SystemStatus>(DEFAULT_SYSTEM_STATUS);
+  const [assessedInvestorRisk, setAssessedInvestorRisk] = useState<number>(70);
 
   // Assistant & Utility Modals
   const [assistantOpen, setAssistantOpen] = useState(false);
@@ -214,6 +215,7 @@ export function App() {
                 onNavigateToReports={() => setCurrentTab('reports')}
                 onNavigateToLanding={() => setCurrentTab('landing')}
                 onNavigateToResearchLab={() => setCurrentTab('research-lab')}
+                onNavigateToRiskProfile={() => setCurrentTab('risk-profile')}
               />
             )}
 
@@ -225,6 +227,7 @@ export function App() {
                   if (featId === 'scam-detector') setCurrentTab('scam-detector');
                   else if (featId === 'transaction-security') setCurrentTab('transaction-security');
                   else if (featId === 'cases') setCurrentTab('cases');
+                  else if (featId === 'risk-profile') setCurrentTab('risk-profile');
                 }}
               />
             )}
@@ -265,10 +268,22 @@ export function App() {
             )}
 
             {currentTab === 'unified-risk' && (
-              <UnifiedRiskView />
+              <UnifiedRiskView
+                initialInvestorRisk={assessedInvestorRisk}
+                onNavigateToRiskProfile={() => setCurrentTab('risk-profile')}
+              />
             )}
 
-            {currentTab === 'risk-profile' && <InvestorProtectionView />}
+            {currentTab === 'risk-profile' && (
+              <InvestorProtectionView
+                onApplyToUnifiedRisk={(score) => {
+                  setAssessedInvestorRisk(score);
+                  setCurrentTab('unified-risk');
+                }}
+                onNavigateToScamDetector={() => setCurrentTab('scam-detector')}
+                onNavigateToTransactionSecurity={() => setCurrentTab('transaction-security')}
+              />
+            )}
 
             {currentTab === 'safety-center' && <SafetyCenterView />}
 

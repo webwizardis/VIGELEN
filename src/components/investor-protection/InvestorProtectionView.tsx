@@ -19,7 +19,17 @@ import { INVESTOR_ASSESSMENT_QUESTIONS, SCAM_JOURNEY_STAGES } from '../../data/m
 import { InvestorProfileResult } from '../../types';
 import { SEBI_DEMOGRAPHIC_METRICS } from '../../data/cleanedIntelligence';
 
-export const InvestorProtectionView: React.FC = () => {
+interface InvestorProtectionViewProps {
+  onApplyToUnifiedRisk?: (score: number) => void;
+  onNavigateToScamDetector?: () => void;
+  onNavigateToTransactionSecurity?: () => void;
+}
+
+export const InvestorProtectionView: React.FC<InvestorProtectionViewProps> = ({
+  onApplyToUnifiedRisk,
+  onNavigateToScamDetector,
+  onNavigateToTransactionSecurity,
+}) => {
   const [activeTab, setActiveTab] = useState<'assessment' | 'journey' | 'sebi-demographics'>('assessment');
   const [selectedCohort, setSelectedCohort] = useState<'Silver Gen' | 'Millennials' | 'Gen Z' | 'Gen X'>('Silver Gen');
 
@@ -50,9 +60,9 @@ export const InvestorProtectionView: React.FC = () => {
       profileLevel: 'HIGH_RISK',
       title: 'High Vulnerability Exposure',
       description:
-        'The answers indicate acute susceptibility to prevalent social media fraud, guaranteed return schemes, or unregistered entity solicitation.',
+        'Diagnostic answers indicate elevated susceptibility to prevalent social media fraud, guaranteed return schemes, or unregistered entity solicitation.',
       vulnerabilityFactors: [
-        'Guaranteed return offers violating securities regulations',
+        'Guaranteed return offers violating statutory securities regulations',
         'Directives to transfer capital to personal or unverified peer accounts',
         'High-pressure artificial urgency preventing deliberate due diligence',
       ],
@@ -69,7 +79,7 @@ export const InvestorProtectionView: React.FC = () => {
       profileLevel: 'MODERATE_RISK',
       title: 'Moderate Caution Recommended',
       description:
-        'Some vulnerability indicators detected. Exercise structured verification prior to committing financial assets.',
+        'Select vulnerability indicators detected. Exercise structured verification prior to committing financial assets.',
       vulnerabilityFactors: [
         'Informal recommendations from social media or video platforms',
         'Incomplete statutory documentation or absence of formal prospectus',
@@ -100,111 +110,130 @@ export const InvestorProtectionView: React.FC = () => {
   const currentStage = SCAM_JOURNEY_STAGES[currentStageIdx];
 
   return (
-    <div className="space-y-6">
-      {/* View Header */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xs font-bold text-indigo-600 uppercase tracking-wider">
-            Protect
-          </span>
-          <span className="text-slate-300">·</span>
-          <span className="text-xs text-slate-500">Retail Profile</span>
+    <div className="space-y-12 max-w-5xl">
+      {/* Editorial Header */}
+      <div className="section-header">
+        <div className="mono text-[#2563eb] mb-3">
+          — Retail Investor Protection & Vulnerability Profiling
         </div>
-        <h1 className="mt-1 font-display text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-          Risk Profile & Educational Safeguards
+
+        <h1 className="font-serif text-[2.8rem] sm:text-[3.6rem] font-semibold text-[#1a1a1a] leading-none tracking-tight mb-4">
+          Investor Risk Profile & Safeguards
         </h1>
-        <p className="mt-1 text-xs text-slate-600 max-w-2xl leading-relaxed">
-          Diagnostic vulnerability evaluation and step-by-step interactive simulation of deceptive investment lifecycles.
+
+        <p className="text-sm sm:text-base text-[#71717a] leading-relaxed max-w-3xl">
+          Empirical vulnerability diagnostics, SEBI 2025 demographic benchmarks, and chronological simulation of high-yield investment scam lifecycles.
         </p>
 
-        {/* Segmented Subtabs */}
-        <div className="mt-5 flex border-b border-slate-200">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTab('assessment')}
-              className={`flex items-center gap-2 border-b-2 px-3.5 py-2 text-xs font-bold transition-colors ${
-                activeTab === 'assessment'
-                  ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40 rounded-t-lg'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <ShieldCheck className="h-4 w-4" />
-              <span>Investor Risk Assessment</span>
-            </button>
+        {/* Subtab Segmented Navigation Buttons */}
+        <div className="flex flex-wrap gap-2 pt-6 border-b border-[#e4e4e7]">
+          <button
+            type="button"
+            onClick={() => setActiveTab('assessment')}
+            className={`px-4 py-2.5 mono text-xs uppercase tracking-wider font-bold transition-all border cursor-pointer ${
+              activeTab === 'assessment'
+                ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]'
+                : 'bg-white text-[#71717a] border-[#e4e4e7] hover:text-[#1a1a1a] hover:border-[#1a1a1a]'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>1. Risk Assessment</span>
+            </span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('journey')}
-              className={`flex items-center gap-2 border-b-2 px-3.5 py-2 text-xs font-bold transition-colors ${
-                activeTab === 'journey'
-                  ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40 rounded-t-lg'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Compass className="h-4 w-4" />
-              <span>Scam Escalation Simulator</span>
-            </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('journey')}
+            className={`px-4 py-2.5 mono text-xs uppercase tracking-wider font-bold transition-all border cursor-pointer ${
+              activeTab === 'journey'
+                ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]'
+                : 'bg-white text-[#71717a] border-[#e4e4e7] hover:text-[#1a1a1a] hover:border-[#1a1a1a]'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Compass className="h-3.5 w-3.5" />
+              <span>2. Scam Escalation Simulator</span>
+            </span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('sebi-demographics')}
-              className={`flex items-center gap-2 border-b-2 px-3.5 py-2 text-xs font-bold transition-colors ${
-                activeTab === 'sebi-demographics'
-                  ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40 rounded-t-lg'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Users className="h-4 w-4" />
-              <span>SEBI 2025 Demographic Risk Benchmarks</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('sebi-demographics')}
+            className={`px-4 py-2.5 mono text-xs uppercase tracking-wider font-bold transition-all border cursor-pointer ${
+              activeTab === 'sebi-demographics'
+                ? 'bg-[#1a1a1a] text-white border-[#1a1a1a]'
+                : 'bg-white text-[#71717a] border-[#e4e4e7] hover:text-[#1a1a1a] hover:border-[#1a1a1a]'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Users className="h-3.5 w-3.5" />
+              <span>3. SEBI 2025 Demographics</span>
+            </span>
+          </button>
         </div>
       </div>
 
-      {/* TAB 1: INVESTOR RISK ASSESSMENT */}
+      {/* SUBTAB 1: INVESTOR RISK ASSESSMENT */}
       {activeTab === 'assessment' && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Assessment Form (2 Cols) */}
-          <div className="space-y-4 lg:col-span-2">
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h2 className="text-sm font-bold text-slate-900">
-                  Investor Safety Diagnostic
-                </h2>
-                <span className="text-xs text-slate-400 font-mono">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          {/* Assessment Form (7 Cols) */}
+          <div className="space-y-6 lg:col-span-7">
+            <div className="border border-[#e4e4e7] bg-white p-6 sm:p-8">
+              <div className="flex items-center justify-between border-b border-[#e4e4e7] pb-4 mb-6">
+                <div>
+                  <div className="mono text-xs text-[#71717a] uppercase font-bold">Diagnostic Survey</div>
+                  <h2 className="font-serif text-2xl font-semibold text-[#1a1a1a] mt-0.5">
+                    Retail Vulnerability Index
+                  </h2>
+                </div>
+                <span className="mono text-xs border border-[#1a1a1a] px-2 py-0.5 bg-[#fdfdfc] text-[#1a1a1a] font-bold">
                   6 Questions
                 </span>
               </div>
 
-              <div className="mt-4 space-y-6">
+              <div className="space-y-8">
                 {INVESTOR_ASSESSMENT_QUESTIONS.map((q, qIndex) => (
-                  <div key={q.id} className="space-y-2">
-                    <p className="text-xs font-bold text-slate-900">
-                      {qIndex + 1}. {q.question}
-                    </p>
-                    <p className="text-[11px] text-slate-500">
-                      {q.description}
-                    </p>
-                    <div className="mt-2 space-y-1.5">
+                  <div key={q.id} className="space-y-3 border-b border-[#f4f4f5] pb-6 last:border-b-0 last:pb-0">
+                    <div>
+                      <span className="mono text-[10px] text-[#71717a] uppercase font-bold">
+                        Question 0{qIndex + 1}
+                      </span>
+                      <p className="font-serif text-lg font-semibold text-[#1a1a1a] mt-0.5 leading-snug">
+                        {q.question}
+                      </p>
+                      <p className="text-xs text-[#71717a] mt-1 leading-relaxed">
+                        {q.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2 pt-1">
                       {q.options.map((opt, optIdx) => {
                         const isSelected = answers[q.id] === optIdx;
                         return (
                           <label
                             key={optIdx}
-                            className={`flex items-center gap-2.5 rounded-lg border p-2.5 text-xs cursor-pointer transition-all ${
+                            className={`flex items-start gap-3 border p-3 text-xs cursor-pointer transition-all ${
                               isSelected
-                                ? 'border-indigo-600 bg-indigo-50/60 font-semibold text-indigo-900 shadow-2xs'
-                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                                ? 'border-[#1a1a1a] bg-[#fdfdfc] shadow-xs text-[#1a1a1a] font-medium'
+                                : 'border-[#e4e4e7] bg-white hover:border-[#1a1a1a] text-[#71717a]'
                             }`}
                           >
                             <input
                               type="radio"
                               name={q.id}
                               checked={isSelected}
-                              onChange={() =>
-                                setAnswers({ ...answers, [q.id]: optIdx })
-                              }
-                              className="accent-indigo-600"
+                              onChange={() => setAnswers({ ...answers, [q.id]: optIdx })}
+                              className="accent-[#1a1a1a] mt-0.5"
                             />
-                            <span>{opt.label}</span>
+                            <div className="flex-1">
+                              <span className={isSelected ? 'text-[#1a1a1a] font-semibold' : 'text-[#71717a]'}>
+                                {opt.label}
+                              </span>
+                            </div>
+                            <span className="mono text-[10px] text-[#71717a] shrink-0">
+                              +{opt.riskPoints} pts
+                            </span>
                           </label>
                         );
                       })}
@@ -215,100 +244,144 @@ export const InvestorProtectionView: React.FC = () => {
             </div>
           </div>
 
-          {/* Assessment Result Card (1 Col) */}
-          <div className="space-y-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 shadow-xs">
-              <div className="border-b border-slate-100 pb-3">
-                <h3 className="text-sm font-bold text-slate-900">
-                  Investor Risk Profile
+          {/* Assessment Result Card (5 Cols) */}
+          <div className="space-y-6 lg:col-span-5">
+            <div className="border border-[#1a1a1a] bg-white p-6 sm:p-8 space-y-6 sticky top-20">
+              <div className="border-b border-[#e4e4e7] pb-4">
+                <span className="mono text-xs text-[#71717a] uppercase font-bold">Evaluation Outcome</span>
+                <h3 className="font-serif text-2xl font-semibold text-[#1a1a1a] mt-0.5">
+                  Calculated Risk Profile
                 </h3>
-                <p className="text-xs text-neutral-500">
-                  Calculated from diagnostic inputs
-                </p>
               </div>
 
-              <div className="rounded-md border border-neutral-100 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-950">
-                <span className="text-xs text-neutral-500">Vulnerability Score</span>
-                <div className="mt-1 flex items-baseline gap-2">
+              {/* Big Score Display */}
+              <div className="border border-[#e4e4e7] bg-[#fdfdfc] p-6 text-center space-y-3">
+                <span className="mono text-[11px] text-[#71717a] uppercase font-bold tracking-wider">
+                  Vulnerability Score
+                </span>
+
+                <div className="flex items-baseline justify-center gap-1.5">
                   <span
-                    className={`font-mono-numbers text-3xl font-extrabold ${
+                    className={`font-serif text-6xl font-bold leading-none ${
                       profile.profileLevel === 'HIGH_RISK'
-                        ? 'text-red-600 dark:text-red-400'
+                        ? 'text-[#be123c]'
                         : profile.profileLevel === 'MODERATE_RISK'
-                        ? 'text-amber-600 dark:text-amber-400'
-                        : 'text-emerald-600 dark:text-emerald-400'
+                        ? 'text-[#ea580c]'
+                        : 'text-[#10b981]'
                     }`}
                   >
                     {profile.score}
                   </span>
-                  <span className="text-xs text-neutral-400">/ 100</span>
+                  <span className="mono text-sm text-[#71717a]">/ 100</span>
                 </div>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+
+                <div className="h-2 w-full overflow-hidden border border-[#1a1a1a] bg-[#e4e4e7]">
                   <div
                     style={{ width: `${profile.score}%` }}
-                    className={`h-full ${
+                    className={`h-full transition-all duration-300 ${
                       profile.profileLevel === 'HIGH_RISK'
-                        ? 'bg-red-500'
+                        ? 'bg-[#be123c]'
                         : profile.profileLevel === 'MODERATE_RISK'
-                        ? 'bg-amber-500'
-                        : 'bg-emerald-500'
+                        ? 'bg-[#ea580c]'
+                        : 'bg-[#10b981]'
                     }`}
                   />
                 </div>
-                <p className="mt-2 text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                  {profile.title}
-                </p>
-                <p className="mt-1 text-[11px] text-neutral-500 leading-relaxed">
+
+                <div className="pt-2">
+                  <span
+                    className={`status-pill ${
+                      profile.profileLevel === 'HIGH_RISK'
+                        ? 'text-[#be123c] border-[#be123c]'
+                        : profile.profileLevel === 'MODERATE_RISK'
+                        ? 'text-[#ea580c] border-[#ea580c]'
+                        : 'text-[#10b981] border-[#10b981]'
+                    }`}
+                  >
+                    {profile.title}
+                  </span>
+                </div>
+
+                <p className="text-xs text-[#71717a] leading-relaxed pt-2">
                   {profile.description}
                 </p>
               </div>
 
-              {/* Actionable Educational Recommendations */}
+              {/* Vulnerability Factors */}
               <div>
-                <h4 className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
-                  Recommended Educational Actions:
+                <h4 className="mono text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">
+                  Key Vulnerability Factors
                 </h4>
-                <ul className="mt-2 space-y-1.5 text-xs text-neutral-600 dark:text-neutral-400">
-                  {profile.safeActions.map((action, idx) => (
+                <ul className="space-y-1.5 text-xs text-[#71717a]">
+                  {profile.vulnerabilityFactors.map((factor, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600 mt-0.5" />
-                      <span>{action}</span>
+                      <span className="text-[#be123c] font-bold">·</span>
+                      <span>{factor}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              {/* Institutional Non-Advisory Guardrail */}
-              <div className="rounded border border-neutral-200 bg-neutral-50 p-3 text-[11px] text-neutral-500 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400">
-                <span className="font-semibold text-neutral-700 dark:text-neutral-300">
-                  Regulatory Guardrail Notice:
+              {/* Recommended Safe Actions */}
+              <div>
+                <h4 className="mono text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">
+                  Recommended Educational Actions
+                </h4>
+                <ul className="space-y-2 text-xs text-[#1a1a1a]">
+                  {profile.safeActions.map((action, idx) => (
+                    <li key={idx} className="flex items-start gap-2 border-l-2 border-[#1a1a1a] pl-2.5 py-0.5">
+                      <span className="text-xs leading-relaxed">{action}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Transfer to Unified Risk Model CTA */}
+              {onApplyToUnifiedRisk && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => onApplyToUnifiedRisk(normalizedScore)}
+                    className="btn btn-primary w-full"
+                  >
+                    <span>Apply Score ({normalizedScore}/100) to Unified Model</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                  <p className="mono text-[10px] text-[#71717a] text-center mt-2">
+                    Feeds directly into the composite 4-vector risk calculation
+                  </p>
+                </div>
+              )}
+
+              {/* Institutional Guardrail */}
+              <div className="border border-[#e4e4e7] p-3 text-[11px] text-[#71717a] bg-[#fdfdfc] leading-relaxed">
+                <span className="mono font-bold text-[#1a1a1a] block mb-0.5">
+                  Statutory Disclaimer
                 </span>
-                <p className="mt-0.5">
-                  VIGILEN provides risk diagnostics, not personalized financial or investment advice. Consult a SEBI/RBI registered investment adviser for asset allocation.
-                </p>
+                VIGILEN diagnostics evaluate behavioural indicators against official SEBI and RBI fraud patterns. These do not constitute regulated investment advisory.
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: SCAM JOURNEY SIMULATOR */}
+      {/* SUBTAB 2: SCAM ESCALATION SIMULATOR */}
       {activeTab === 'journey' && (
-        <div className="rounded-lg border border-neutral-200 bg-white p-6 space-y-6 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="border border-[#1a1a1a] bg-white p-6 sm:p-8 space-y-8">
           <div>
-            <span className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-              Educational Simulation
+            <span className="mono text-[#2563eb] text-xs font-bold uppercase">
+              Chronological Simulator
             </span>
-            <h2 className="mt-1 font-display text-xl font-bold text-neutral-900 dark:text-neutral-50">
-              How an Investment Scam Can Escalate
+            <h2 className="font-serif text-3xl font-semibold text-[#1a1a1a] mt-1">
+              How an Investment Scam Escalates
             </h2>
-            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-              Walk through the 7 typical escalation phases of high-yield social media and investment scams to identify early intervention checkpoints.
+            <p className="text-xs sm:text-sm text-[#71717a] mt-1 max-w-2xl leading-relaxed">
+              Step through the 7 typical chronological phases of high-yield social media schemes to understand psychological levers and defensive checkpoints.
             </p>
           </div>
 
           {/* Stepper Navigation */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7 border-y border-neutral-100 py-3 dark:border-neutral-800">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7 border-y border-[#e4e4e7] py-4">
             {SCAM_JOURNEY_STAGES.map((stg, idx) => {
               const isCurrent = idx === currentStageIdx;
               const isPast = idx < currentStageIdx;
@@ -316,18 +389,18 @@ export const InvestorProtectionView: React.FC = () => {
                 <button
                   key={stg.step}
                   onClick={() => setCurrentStageIdx(idx)}
-                  className={`flex flex-col items-start p-2 rounded text-left transition-colors ${
+                  className={`flex flex-col items-start p-3 text-left transition-all border cursor-pointer ${
                     isCurrent
-                      ? 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900'
+                      ? 'border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-xs'
                       : isPast
-                      ? 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200'
-                      : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-900'
+                      ? 'border-[#e4e4e7] bg-[#fdfdfc] text-[#1a1a1a] hover:border-[#1a1a1a]'
+                      : 'border-transparent text-[#71717a] hover:bg-[#fdfdfc]'
                   }`}
                 >
-                  <span className="font-mono text-[10px] font-semibold">
-                    Step 0{stg.step}
+                  <span className="mono text-[10px] font-bold">
+                    Phase 0{stg.step}
                   </span>
-                  <span className="text-xs font-medium truncate w-full mt-0.5">
+                  <span className="text-xs font-semibold truncate w-full mt-1">
                     {stg.title}
                   </span>
                 </button>
@@ -336,92 +409,103 @@ export const InvestorProtectionView: React.FC = () => {
           </div>
 
           {/* Stage Details Card */}
-          <div className="rounded-lg border border-neutral-100 bg-neutral-50 p-5 space-y-5 dark:border-neutral-800 dark:bg-neutral-950">
-            <div className="flex flex-col justify-between gap-2 border-b border-neutral-200/60 pb-3 sm:flex-row sm:items-center dark:border-neutral-800">
+          <div className="border border-[#e4e4e7] bg-[#fdfdfc] p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col justify-between gap-3 border-b border-[#e4e4e7] pb-4 sm:flex-row sm:items-center">
               <div>
-                <span className="font-mono text-xs text-neutral-500">
-                  Phase {currentStage.step} of 7 · Channel: {currentStage.channel}
+                <span className="mono text-xs text-[#71717a]">
+                  Phase {currentStage.step} of 7 · Channel Vector: {currentStage.channel}
                 </span>
-                <h3 className="text-base font-bold text-neutral-900 dark:text-neutral-100 mt-0.5">
+                <h3 className="font-serif text-2xl font-semibold text-[#1a1a1a] mt-0.5">
                   {currentStage.title}
                 </h3>
               </div>
               <div className="text-right">
-                <span className="font-mono text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                <span className="status-pill text-[#be123c] border-[#be123c]">
                   Escalation Risk: {currentStage.riskScore}/100
                 </span>
               </div>
             </div>
 
             {/* Three Pillar Breakdown */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               {/* Scammer Tactic */}
-              <div className="rounded-md border border-neutral-200/60 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-                <span className="text-xs font-semibold text-red-600 dark:text-red-400">
-                  What the Scammer is Attempting
-                </span>
-                <p className="mt-2 text-xs text-neutral-700 leading-relaxed dark:text-neutral-300">
-                  {currentStage.scammerTactic}
-                </p>
-                <div className="mt-3 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 dark:border-neutral-800">
-                  <strong>Target Vector:</strong> {currentStage.userPerspective}
+              <div className="border border-[#e4e4e7] bg-white p-5 flex flex-col justify-between">
+                <div>
+                  <span className="mono text-[10px] font-bold text-[#be123c] uppercase">
+                    1. Scammer Strategy
+                  </span>
+                  <p className="mt-2 text-xs text-[#1a1a1a] leading-relaxed">
+                    {currentStage.scammerTactic}
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-[#e4e4e7] mono text-[10px] text-[#71717a]">
+                  <strong>Victim Vector:</strong> {currentStage.userPerspective}
                 </div>
               </div>
 
               {/* Warning Signs */}
-              <div className="rounded-md border border-neutral-200/60 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-                <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
-                  Potential Warning Signs
-                </span>
-                <ul className="mt-2 space-y-1.5 text-xs text-neutral-700 dark:text-neutral-300">
-                  {currentStage.warningSigns.map((sign, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-amber-500">⚠</span>
-                      <span>{sign}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="border border-[#e4e4e7] bg-white p-5 flex flex-col justify-between">
+                <div>
+                  <span className="mono text-[10px] font-bold text-[#ea580c] uppercase">
+                    2. Warning Signs
+                  </span>
+                  <ul className="mt-2 space-y-1.5 text-xs text-[#1a1a1a]">
+                    {currentStage.warningSigns.map((sign, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <span className="text-[#ea580c]">⚠</span>
+                        <span>{sign}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-4 pt-3 border-t border-[#e4e4e7] mono text-[10px] text-[#71717a]">
+                  Pre-transfer psychological cues
+                </div>
               </div>
 
               {/* Investor Verification Step */}
-              <div className="rounded-md border border-neutral-200/60 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  What the Investor Could Verify
-                </span>
-                <p className="mt-2 text-xs text-neutral-700 leading-relaxed dark:text-neutral-300">
-                  {currentStage.investorVerificationStep}
-                </p>
-                <div className="mt-3 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 dark:border-neutral-800">
-                  <strong>Recourse:</strong> Cybercrime 1930 / SEBI SCORES Portal
+              <div className="border border-[#e4e4e7] bg-white p-5 flex flex-col justify-between">
+                <div>
+                  <span className="mono text-[10px] font-bold text-[#10b981] uppercase">
+                    3. Verification Step
+                  </span>
+                  <p className="mt-2 text-xs text-[#1a1a1a] leading-relaxed">
+                    {currentStage.investorVerificationStep}
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-[#e4e4e7] mono text-[10px] text-[#71717a]">
+                  National Helpline: 1930 / scores.gov.in
                 </div>
               </div>
             </div>
 
             {/* Stepper Controls */}
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center justify-between pt-4 border-t border-[#e4e4e7]">
               <button
+                type="button"
                 onClick={() => setCurrentStageIdx(Math.max(0, currentStageIdx - 1))}
                 disabled={currentStageIdx === 0}
-                className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-40 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300"
+                className="btn btn-secondary disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                <span>Previous Stage</span>
+                <span>Previous Phase</span>
               </button>
 
-              <span className="font-mono text-xs text-neutral-400">
-                {currentStageIdx + 1} / {SCAM_JOURNEY_STAGES.length}
+              <span className="mono text-xs text-[#71717a]">
+                Phase {currentStageIdx + 1} of {SCAM_JOURNEY_STAGES.length}
               </span>
 
               <button
+                type="button"
                 onClick={() =>
                   setCurrentStageIdx(
                     Math.min(SCAM_JOURNEY_STAGES.length - 1, currentStageIdx + 1)
                   )
                 }
                 disabled={currentStageIdx === SCAM_JOURNEY_STAGES.length - 1}
-                className="inline-flex items-center gap-1.5 rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800 disabled:opacity-40 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+                className="btn btn-primary disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <span>Next Stage</span>
+                <span>Next Phase</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -429,80 +513,84 @@ export const InvestorProtectionView: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 3: SEBI 2025 DEMOGRAPHIC RISK BENCHMARKS */}
+      {/* SUBTAB 3: SEBI 2025 DEMOGRAPHIC RISK BENCHMARKS */}
       {activeTab === 'sebi-demographics' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Top Metric Highlights */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <span className="mono text-[11px] text-slate-500">SEBI Survey Record</span>
-              <p className="text-xl font-bold text-slate-900 mt-1">Silver Generation</p>
-              <div className="mt-2 flex items-baseline gap-1 text-emerald-700">
-                <span className="text-2xl font-black font-mono-numbers">85%</span>
-                <span className="text-xs">prioritize capital safety</span>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="border border-[#1a1a1a] bg-white p-5">
+              <span className="mono text-[10px] text-[#71717a]">SEBI Record #4</span>
+              <p className="font-serif text-xl font-semibold text-[#1a1a1a] mt-1">Silver Generation</p>
+              <div className="mt-3 flex items-baseline gap-1.5 text-[#10b981]">
+                <span className="font-serif text-4xl font-bold leading-none">85%</span>
+                <span className="mono text-xs text-[#71717a]">capital safety</span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                SEBI Record #4: Seniors demand maximum capital preservation.
+              <p className="text-xs text-[#71717a] mt-2 leading-normal">
+                Seniors demand absolute capital preservation and are targeted via pension schemes.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <span className="mono text-[11px] text-slate-500">Gender Risk Variance</span>
-              <p className="text-xl font-bold text-slate-900 mt-1">Risk Aversion</p>
-              <div className="mt-2 flex items-baseline gap-1 text-indigo-700">
-                <span className="text-2xl font-black font-mono-numbers">82% vs 78%</span>
+            <div className="border border-[#e4e4e7] bg-white p-5">
+              <span className="mono text-[10px] text-[#71717a]">SEBI Record #5</span>
+              <p className="font-serif text-xl font-semibold text-[#1a1a1a] mt-1">Gender Risk Variance</p>
+              <div className="mt-3 flex items-baseline gap-1.5 text-[#2563eb]">
+                <span className="font-serif text-4xl font-bold leading-none">82% vs 78%</span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                SEBI Record #5: 82% women prefer low-risk vs 78% men.
+              <p className="text-xs text-[#71717a] mt-2 leading-normal">
+                82% of female investors prefer low-risk instruments vs 78% of male investors.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <span className="mono text-[11px] text-slate-500">Millennial Cohort</span>
-              <p className="text-xl font-bold text-slate-900 mt-1">Market Participation</p>
-              <div className="mt-2 flex items-baseline gap-1 text-blue-700">
-                <span className="text-2xl font-black font-mono-numbers">11%</span>
-                <span className="text-xs">highest equity rate</span>
+            <div className="border border-[#e4e4e7] bg-white p-5">
+              <span className="mono text-[10px] text-[#71717a]">SEBI Record #1</span>
+              <p className="font-serif text-xl font-semibold text-[#1a1a1a] mt-1">Millennial Cohort</p>
+              <div className="mt-3 flex items-baseline gap-1.5 text-[#1a1a1a]">
+                <span className="font-serif text-4xl font-bold leading-none">11%</span>
+                <span className="mono text-xs text-[#71717a]">market participation</span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                SEBI Record #1: Millennials lead overall securities participation.
+              <p className="text-xs text-[#71717a] mt-2 leading-normal">
+                Highest equity adoption rate across all demographics; targeted via Telegram options channels.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <span className="mono text-[11px] text-slate-500">Gen Z Cohort</span>
-              <p className="text-xl font-bold text-slate-900 mt-1">Direct Stocks</p>
-              <div className="mt-2 flex items-baseline gap-1 text-purple-700">
-                <span className="text-2xl font-black font-mono-numbers">5%</span>
-                <span className="text-xs">direct equities</span>
+            <div className="border border-[#e4e4e7] bg-white p-5">
+              <span className="mono text-[10px] text-[#71717a]">SEBI Record #3</span>
+              <p className="font-serif text-xl font-semibold text-[#1a1a1a] mt-1">Gen Z Cohort</p>
+              <div className="mt-3 flex items-baseline gap-1.5 text-[#71717a]">
+                <span className="font-serif text-4xl font-bold leading-none">5%</span>
+                <span className="mono text-xs text-[#71717a]">direct equities</span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                SEBI Record #3: Rapidly onboarding via digital discount brokers.
+              <p className="text-xs text-[#71717a] mt-2 leading-normal">
+                Rapidly onboarding via discount brokers; vulnerable to unverified social influencers.
               </p>
             </div>
           </div>
 
           {/* Interactive Cohort Explorer */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+          <div className="border border-[#1a1a1a] bg-white p-6 sm:p-8 space-y-6">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
-                SEBI Demographic Profiler & Guardrail Simulator
+              <span className="mono text-[#2563eb] text-xs font-bold uppercase">
+                Demographic Profiler
+              </span>
+              <h3 className="font-serif text-2xl font-semibold text-[#1a1a1a] mt-0.5">
+                Cohort Susceptibility & Automated Rules
               </h3>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Select an investor demographic cohort to observe empirical securities adoption rates, prevalent fraud vectors, and VIGILEN automated behavioral guardrails.
+              <p className="text-xs sm:text-sm text-[#71717a] mt-1 leading-relaxed max-w-3xl">
+                Select an investor demographic cohort to observe empirical securities participation rates, prevalent scam patterns, and automated VIGILEN interception rules.
               </p>
             </div>
 
-            {/* Cohort Selector Pills */}
+            {/* Cohort Selector Buttons */}
             <div className="flex flex-wrap gap-2">
               {(['Silver Gen', 'Millennials', 'Gen Z', 'Gen X'] as const).map((cohort) => (
                 <button
                   key={cohort}
+                  type="button"
                   onClick={() => setSelectedCohort(cohort)}
-                  className={`rounded-lg border px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
+                  className={`border px-4 py-2 text-xs mono font-bold uppercase transition-all cursor-pointer ${
                     selectedCohort === cohort
-                      ? 'border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-2xs'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400'
+                      ? 'border-[#1a1a1a] bg-[#1a1a1a] text-white'
+                      : 'border-[#e4e4e7] bg-white text-[#71717a] hover:border-[#1a1a1a] hover:text-[#1a1a1a]'
                   }`}
                 >
                   {cohort} {cohort === 'Silver Gen' ? '(Age 55+)' : cohort === 'Millennials' ? '(Age 28-43)' : cohort === 'Gen Z' ? '(Age 18-27)' : '(Age 44-54)'}
@@ -511,25 +599,27 @@ export const InvestorProtectionView: React.FC = () => {
             </div>
 
             {/* Cohort Breakdown Card */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="border border-[#e4e4e7] bg-[#fdfdfc] p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <span className="mono text-[10px] text-slate-500">Securities Market Penetration</span>
-                <div className="mt-2 space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-600">Overall Securities Market:</span>
-                    <span className="font-mono font-bold text-slate-900">
+                <span className="mono text-[10px] text-[#71717a] uppercase font-bold">
+                  Securities Participation
+                </span>
+                <div className="mt-3 space-y-2 text-xs">
+                  <div className="flex justify-between items-center py-1 border-b border-[#e4e4e7]">
+                    <span className="text-[#71717a]">Overall Market:</span>
+                    <span className="mono font-bold text-[#1a1a1a]">
                       {selectedCohort === 'Millennials' ? '11%' : selectedCohort === 'Gen Z' ? '9%' : selectedCohort === 'Gen X' ? '8%' : '6%'}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-600">Mutual Funds / ETFs:</span>
-                    <span className="font-mono font-bold text-slate-900">
+                  <div className="flex justify-between items-center py-1 border-b border-[#e4e4e7]">
+                    <span className="text-[#71717a]">Mutual Funds / ETFs:</span>
+                    <span className="mono font-bold text-[#1a1a1a]">
                       {selectedCohort === 'Millennials' ? '8%' : selectedCohort === 'Gen Z' ? '6%' : selectedCohort === 'Gen X' ? '6%' : '4%'}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-600">Direct Stocks / Equities:</span>
-                    <span className="font-mono font-bold text-slate-900">
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-[#71717a]">Direct Equities:</span>
+                    <span className="mono font-bold text-[#1a1a1a]">
                       {selectedCohort === 'Millennials' ? '6%' : selectedCohort === 'Gen Z' ? '5%' : selectedCohort === 'Gen X' ? '4%' : '3%'}
                     </span>
                   </div>
@@ -537,8 +627,10 @@ export const InvestorProtectionView: React.FC = () => {
               </div>
 
               <div>
-                <span className="mono text-[10px] text-slate-500">Primary Risk Vulnerability</span>
-                <p className="mt-2 text-xs text-slate-800 leading-relaxed font-medium">
+                <span className="mono text-[10px] text-[#71717a] uppercase font-bold">
+                  Prevalent Threat Vector
+                </span>
+                <p className="mt-3 text-xs text-[#1a1a1a] leading-relaxed">
                   {selectedCohort === 'Silver Gen'
                     ? 'Senior citizens are predominantly targeted via fake PMS clones (e.g. Motilal/CRTrade clones), fake institutional quota IPOs, and unverified phone/WhatsApp advisors offering "safe guaranteed fixed pensions".'
                     : selectedCohort === 'Millennials'
@@ -550,19 +642,21 @@ export const InvestorProtectionView: React.FC = () => {
               </div>
 
               <div>
-                <span className="mono text-[10px] text-slate-500">VIGILEN Automated Protective Rule</span>
-                <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50/80 p-3 text-xs text-emerald-950">
-                  <p className="font-bold flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-700 shrink-0" />
-                    <span>
+                <span className="mono text-[10px] text-[#71717a] uppercase font-bold">
+                  VIGILEN Defensive Rule
+                </span>
+                <div className="mt-3 border border-[#1a1a1a] bg-white p-3.5 space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-[#10b981]" />
+                    <span className="mono text-[11px] font-bold text-[#1a1a1a]">
                       {selectedCohort === 'Silver Gen'
-                        ? 'Enforce Zero-Guaranteed-Return Mandate'
+                        ? 'Zero-Guaranteed-Return Mandate'
                         : selectedCohort === 'Millennials'
-                        ? 'High-Velocity Transfer Verification'
-                        : 'Unverified Social Handle Interception'}
+                        ? 'High-Velocity Outflow Intercept'
+                        : 'Unregistered Handle Shield'}
                     </span>
-                  </p>
-                  <p className="text-[11px] text-emerald-900/90 mt-1 leading-normal">
+                  </div>
+                  <p className="text-[11px] text-[#71717a] leading-relaxed">
                     {selectedCohort === 'Silver Gen'
                       ? 'Automatically triggers critical warning on any communication lacking statutory SEBI risk disclosures or demanding peer UPI transfers.'
                       : selectedCohort === 'Millennials'
@@ -575,20 +669,27 @@ export const InvestorProtectionView: React.FC = () => {
           </div>
 
           {/* Official SEBI Survey Data Table */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">
-              Source Records: SEBI Investor Survey 2025
-            </h4>
+          <div className="border border-[#e4e4e7] bg-white p-6 sm:p-8 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#e4e4e7] pb-3">
+              <span className="mono text-xs font-bold text-[#1a1a1a] uppercase">
+                Ground-Truth Dataset: SEBI Investor Survey 2025
+              </span>
+              <span className="mono text-[10px] text-[#71717a]">
+                5 Ingested Benchmarks
+              </span>
+            </div>
             <div className="space-y-2">
               {SEBI_DEMOGRAPHIC_METRICS.map((metric) => (
-                <div key={metric.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 text-xs gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded bg-emerald-100 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-800">
+                <div key={metric.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border border-[#e4e4e7] bg-[#fdfdfc] text-xs gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="mono text-[10px] border border-[#1a1a1a] px-2 py-0.5 bg-white font-bold text-[#1a1a1a]">
                       {metric.id}
                     </span>
-                    <span className="font-bold text-slate-900">{metric.rawEntity}</span>
+                    <span className="font-serif font-bold text-base text-[#1a1a1a]">
+                      {metric.rawEntity}
+                    </span>
                   </div>
-                  <div className="text-slate-700 font-mono text-[11px] bg-white px-2.5 py-1 rounded border border-slate-200">
+                  <div className="mono text-[11px] bg-white px-3 py-1.5 border border-[#e4e4e7] text-[#1a1a1a]">
                     {metric.description}
                   </div>
                 </div>
