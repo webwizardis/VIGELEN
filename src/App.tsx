@@ -213,6 +213,7 @@ export function App() {
                 onNavigateToCases={() => setCurrentTab('cases')}
                 onNavigateToReports={() => setCurrentTab('reports')}
                 onNavigateToLanding={() => setCurrentTab('landing')}
+                onNavigateToResearchLab={() => setCurrentTab('research-lab')}
               />
             )}
 

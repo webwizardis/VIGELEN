@@ -44,6 +44,24 @@ export const SAMPLE_INVESTMENT_TEXTS = [
     category: 'INFLUENCER_FOMO',
     expectedRisk: 'MEDIUM',
   },
+  {
+    title: 'NSE Blacklist #817: SmartTradeSoftware (Telegram)',
+    text: 'ALERT: Join t.me/SmartTradeSoftware for guaranteed intraday Nifty options calls. 100% sure-shot accuracy with 40% weekly returns promised. Deposit ₹10,000 joining fee to get target entry.',
+    category: 'OFFICIAL_BLACKLIST_MATCH',
+    expectedRisk: 'CRITICAL',
+  },
+  {
+    title: 'NSE Blacklist #786: MODMA APK (Clone App)',
+    text: 'Download MODMA application directly from new1-stock-india-cdn.obs.ap-southeast-3.myhuaweicloud.com/app/MODMA.apk to access institutional QIB allocation with 120% guaranteed listing gains.',
+    category: 'OFFICIAL_BLACKLIST_MATCH',
+    expectedRisk: 'CRITICAL',
+  },
+  {
+    title: 'NSE Blacklist #804: mofslmaxs.com (Broker Clone)',
+    text: 'Access institutional VIP portal at https://www.mofslmaxs.com/ for high-yield private portfolio management. Deposit capital now to secure guaranteed daily profit.',
+    category: 'OFFICIAL_BLACKLIST_MATCH',
+    expectedRisk: 'CRITICAL',
+  },
 ];
 
 export const SAMPLE_SCREENSHOTS = [
@@ -89,6 +107,23 @@ export const SAMPLE_TRANSACTION_PRESETS: { name: string; description: string; da
       historicalAvgAmount: 3200,
       historicalFrequencyPerDay: 3.2,
       currentDailyCount: 7,
+    },
+  },
+  {
+    name: 'Official NSE Blacklist Match: ₹45,000 to tradekaropay.com',
+    description: 'Direct outflow to tradekaropay.com (NSE Record #727 flagged for illegal unauthorized financial operations).',
+    data: {
+      amount: 45000,
+      currency: 'INR',
+      transactionTime: '11:15',
+      merchant: 'tradekaropay.com',
+      transactionType: 'UPI_P2M',
+      location: 'Delhi, IN',
+      device: 'OnePlus 12 (Known)',
+      accountAgeMonths: 20,
+      historicalAvgAmount: 2800,
+      historicalFrequencyPerDay: 2.5,
+      currentDailyCount: 3,
     },
   },
   {
@@ -341,6 +376,16 @@ export const SCAM_JOURNEY_STAGES: ScamJourneyStage[] = [
 
 export const RESEARCH_MODEL_METRICS: ModelMetric[] = [
   {
+    modelName: 'VIGILEN Regulatory Ensemble (NSE/RBI/SEBI Ground-Truth)',
+    category: 'NLP',
+    accuracy: 0.988,
+    precision: 0.985,
+    recall: 0.992,
+    f1Score: 0.988,
+    rocAuc: 0.996,
+    latencyMs: 32,
+  },
+  {
     modelName: 'VIGILEN Risk Model (Composite Heuristic & Transformer)',
     category: 'NLP',
     accuracy: 0.942,
@@ -415,6 +460,32 @@ export const RESEARCH_MODEL_METRICS: ModelMetric[] = [
 ];
 
 export const RESEARCH_DATASETS: DatasetInfo[] = [
+  {
+    id: 'ds-reg-278',
+    name: 'Official Regulatory Intelligence Ground-Truth (NSE/RBI/SEBI 278 Records)',
+    description: 'Cleaned, normalized multi-source benchmark compiling 270 client-reported fraud entities from the official NSE caution list (APKs, clone sites, Telegram channels), RBI macro banking fraud aggregates (₹18,674 Cr), and SEBI 2025 investor demographic priors.',
+    type: 'TEXT_SCAMS',
+    rowCount: 278,
+    columnCount: 16,
+    missingValues: 0,
+    duplicateRecords: 0,
+    classDistribution: [
+      { label: 'NSE Flagged Malicious Entity (Target = 1.0)', count: 270, percentage: 97.1 },
+      { label: 'SEBI Investor Demographic Benchmarks', count: 5, percentage: 1.8 },
+      { label: 'RBI Banking Frauds Aggregate Records', count: 3, percentage: 1.1 },
+    ],
+    features: [
+      { name: 'source_agency', type: 'categorical', missingPct: 0.0 },
+      { name: 'normalized_record_type', type: 'categorical', missingPct: 0.0 },
+      { name: 'channel_platform', type: 'categorical', missingPct: 0.0 },
+      { name: 'search_token', type: 'text', missingPct: 0.0 },
+      { name: 'threat_classification', type: 'categorical', missingPct: 0.0 },
+      { name: 'risk_score', type: 'numerical', missingPct: 0.0 },
+      { name: 'target_label', type: 'numerical', missingPct: 0.0 },
+      { name: 'recommended_action', type: 'categorical', missingPct: 0.0 },
+    ],
+    lastUpdated: 'Official December 2025 Release',
+  },
   {
     id: 'ds-01',
     name: 'SEBI & Social Media Investment Scam Corpus (SSIC-2025)',

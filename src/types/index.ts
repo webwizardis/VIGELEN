@@ -8,7 +8,22 @@ export type IndicatorCategory =
   | 'SUSPICIOUS_CONTACT'
   | 'COMMISSION_PYRAMID'
   | 'IMPERSONATION'
-  | 'MISSING_DISCLOSURE';
+  | 'MISSING_DISCLOSURE'
+  | 'REGULATORY_BLACKLIST';
+
+export interface MatchedRegulatoryRecord {
+  id: string;
+  sourceAgency: 'NSE' | 'RBI' | 'SEBI';
+  sourceRecordId: string;
+  rawEntity: string;
+  normalizedEntity: string;
+  channelPlatform: string;
+  threatClassification: string;
+  labelBasis: string;
+  recommendedAction: string;
+  dateOrPeriod?: string;
+  notes?: string;
+}
 
 export interface DetectedIndicator {
   id: string;
@@ -45,6 +60,7 @@ export interface TextAnalysisResult {
   confidence: number; // 0.0 to 1.0
   indicators: DetectedIndicator[];
   claim?: InvestmentClaim;
+  matchedRegulatoryRecord?: MatchedRegulatoryRecord;
   explanation: {
     summary: string;
     whyFlagged: string[];

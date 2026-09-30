@@ -7,7 +7,9 @@ import {
   UnifiedRiskWeights,
   UnifiedRiskResult,
   RiskLevel,
+  MatchedRegulatoryRecord,
 } from '../types';
+import { matchBlacklistedEntity, RegulatoryIntelligenceRecord } from '../data/cleanedIntelligence';
 
 export function determineRiskLevel(score: number): RiskLevel {
   if (score >= 80) return 'CRITICAL';
@@ -72,6 +74,43 @@ export function analyzeTextContent(text: string, inputType: 'text' | 'screenshot
   const indicators: DetectedIndicator[] = [];
   const signals: { label: string; impact: number; direction: 'increases_risk' | 'decreases_risk' }[] = [];
   let score = 10;
+
+  // 0. Official Regulatory Blacklist & Caution Notice Cross-Check (NSE, RBI, SEBI)
+  const matchedBlacklist = matchBlacklistedEntity(text);
+  let matchedRecord: MatchedRegulatoryRecord | undefined = undefined;
+
+  if (matchedBlacklist) {
+    score = 100;
+    matchedRecord = {
+      id: matchedBlacklist.id,
+      sourceAgency: matchedBlacklist.sourceAgency,
+      sourceRecordId: matchedBlacklist.sourceRecordId,
+      rawEntity: matchedBlacklist.rawEntity,
+      normalizedEntity: matchedBlacklist.normalizedEntity,
+      channelPlatform: matchedBlacklist.channelPlatform,
+      threatClassification: matchedBlacklist.threatClassification,
+      labelBasis: matchedBlacklist.labelBasis,
+      recommendedAction: matchedBlacklist.recommendedAction,
+      dateOrPeriod: matchedBlacklist.dateOrPeriod,
+      notes: matchedBlacklist.notes,
+    };
+
+    indicators.push({
+      id: `ind-regulatory-blacklist-${matchedBlacklist.sourceRecordId}`,
+      category: 'REGULATORY_BLACKLIST',
+      label: `Official ${matchedBlacklist.sourceAgency} Blacklist Match (#${matchedBlacklist.sourceRecordId})`,
+      description: `Identified on the official ${matchedBlacklist.sourceAgency} caution list as "${matchedBlacklist.rawEntity}" (${matchedBlacklist.threatClassification.replace(/_/g, ' ')}). Basis: ${matchedBlacklist.labelBasis}`,
+      severity: 'critical',
+      confidence: 0.99,
+      highlightText: matchedBlacklist.rawEntity,
+      contributionScore: 70,
+    });
+    signals.push({
+      label: `Matched official ${matchedBlacklist.sourceAgency} blacklist: ${matchedBlacklist.rawEntity}`,
+      impact: 70,
+      direction: 'increases_risk',
+    });
+  }
 
   // 1. Guaranteed returns
   const guaranteeMatch = text.match(/(guaranteed|100%\s*(accurate|sure|money-back)|risk-free|zero\s+market\s+risk|safe\s+profit)/i);
@@ -215,7 +254,9 @@ export function analyzeTextContent(text: string, inputType: 'text' | 'screenshot
   const riskLevel = determineRiskLevel(finalScore);
 
   let classification = 'Potentially Suspicious Investment Content';
-  if (finalScore >= 80) classification = 'High-Risk Investment Scam Signal';
+  if (matchedRecord) {
+    classification = `Official ${matchedRecord.sourceAgency} Blacklisted Entity (${matchedRecord.channelPlatform})`;
+  } else if (finalScore >= 80) classification = 'High-Risk Investment Scam Signal';
   else if (finalScore >= 60) classification = 'Potentially Suspicious Financial Promotion';
   else if (finalScore >= 35) classification = 'Unverified Financial Advisory with Elevated Risk';
   else classification = 'Low-Risk / Regulated Financial Communication';
@@ -238,22 +279,31 @@ export function analyzeTextContent(text: string, inputType: 'text' | 'screenshot
     confidence: indicators.length > 0 ? 0.88 + Math.min(0.08, indicators.length * 0.02) : 0.94,
     indicators,
     claim,
+    matchedRegulatoryRecord: matchedRecord,
     explanation: {
-      summary:
-        finalScore >= 60
-          ? 'Potentially high-risk characteristics detected. Multiple linguistic and procedural signals match documented retail investment frauds.'
-          : 'Low-to-moderate risk profile. Content demonstrates either compliant disclaimers or minimal aggressive solicitation markers.',
+      summary: matchedRecord
+        ? `CRITICAL RISK: Entity identified on the official ${matchedRecord.sourceAgency} Caution Notice blacklist (#${matchedRecord.sourceRecordId}) for client complaints involving ${matchedRecord.threatClassification.replace(/_/g, ' ')}.`
+        : finalScore >= 60
+        ? 'Potentially high-risk characteristics detected. Multiple linguistic and procedural signals match documented retail investment frauds.'
+        : 'Low-to-moderate risk profile. Content demonstrates either compliant disclaimers or minimal aggressive solicitation markers.',
       whyFlagged,
       topSignals: signals.sort((a, b) => b.impact - a.impact),
     },
-    recommendedActions: [
-      'Do not transfer money to individual UPI handles or unverified bank accounts.',
-      'Cross-check the adviser registration number directly on SEBI SCORES (scores.gov.in) or RBI Sachet portal.',
-      'Report unsolicited investment solicitation to the National Cyber Crime Reporting Portal (1930 / cybercrime.gov.in).',
-      'Review mandatory offer documents and past performance disclaimers prior to capital deployment.',
-    ],
+    recommendedActions: matchedRecord
+      ? [
+          `IMMEDIATE ACTION: Cease all financial interactions and block entity ("${matchedRecord.rawEntity}").`,
+          `Basis: ${matchedRecord.labelBasis}.`,
+          'File an immediate complaint on the National Cyber Crime Portal (1930 / cybercrime.gov.in) and SEBI SCORES.',
+          'Never deposit funds to personal UPI VPAs, APK apps, or unverified Telegram channels.',
+        ]
+      : [
+          'Do not transfer money to individual UPI handles or unverified bank accounts.',
+          'Cross-check the adviser registration number directly on SEBI SCORES (scores.gov.in) or RBI Sachet portal.',
+          'Report unsolicited investment solicitation to the National Cyber Crime Reporting Portal (1930 / cybercrime.gov.in).',
+          'Review mandatory offer documents and past performance disclaimers prior to capital deployment.',
+        ],
     disclaimer:
-      'VIGILEN provides prototype risk indicators, not definitive legal proof of fraud. All assessments represent probabilistic detection requiring independent regulatory verification.',
+      'VIGILEN cross-references real-time regulatory databases (NSE, RBI, SEBI). Assessments represent probabilistic and reported entity matches for retail investor protection.',
     isDemoData: false,
   };
 }
@@ -325,7 +375,20 @@ export function analyzeTransaction(data: TransactionData): TransactionAnomalyRes
     reasons.push('Transaction originates from an unfamiliar hardware device.');
   }
 
-  // 4. Merchant / Beneficiary Anomaly
+  // 4. Merchant / Beneficiary Anomaly & Official Blacklist Check
+  const matchedMerchant = matchBlacklistedEntity(data.merchant);
+  if (matchedMerchant) {
+    score = 100;
+    anomalies.push({
+      type: 'MERCHANT',
+      detected: true,
+      description: `CRITICAL: Beneficiary "${data.merchant}" matches official ${matchedMerchant.sourceAgency} caution notice (#${matchedMerchant.sourceRecordId}) for ${matchedMerchant.threatClassification.replace(/_/g, ' ')}.`,
+      severity: 'critical',
+      contributionScore: 60,
+    });
+    reasons.push(`Beneficiary handle matches an official ${matchedMerchant.sourceAgency} caution list record (#${matchedMerchant.sourceRecordId}): ${matchedMerchant.labelBasis}`);
+  }
+
   const isIndividualUPI = data.transactionType === 'UPI_P2P' || /@oksbi|@paytm|@ybl|@upi/i.test(data.merchant);
   const isCryptoGateway = data.transactionType === 'CRYPTO_GATEWAY';
   if (isIndividualUPI && data.amount > 20000) {

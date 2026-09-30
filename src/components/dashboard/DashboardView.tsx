@@ -9,8 +9,14 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Database, FileSpreadsheet, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { SystemStatus } from '../../types';
+import {
+  REGULATORY_INTELLIGENCE_RECORDS,
+  BLACKLISTED_MALICIOUS_ENTITIES,
+  RBI_FRAUD_AGGREGATES,
+  SEBI_DEMOGRAPHIC_METRICS,
+} from '../../data/cleanedIntelligence';
 
 interface DashboardViewProps {
   systemStatus?: SystemStatus;
@@ -20,6 +26,7 @@ interface DashboardViewProps {
   onNavigateToCases: () => void;
   onNavigateToReports: () => void;
   onNavigateToLanding?: () => void;
+  onNavigateToResearchLab?: () => void;
 }
 
 interface ActivityItem {
@@ -89,6 +96,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateToScamDetector,
   onNavigateToTransactionSecurity,
   onNavigateToCases,
+  onNavigateToResearchLab,
 }) => {
   const [timeRange, setTimeRange] = useState<'30D' | '14D' | '7D'>('30D');
   const [activeVector, setActiveVector] = useState<'all' | 'content' | 'transaction' | 'behavioral'>('all');
@@ -105,23 +113,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     {
       id: 'act-1',
       vector: 'Investment',
-      incidentSummary: 'Guaranteed 45% return claim flagged in 15-day window',
-      riskAssessment: 'HIGH RISK',
+      incidentSummary: 'Official NSE Match: t.me/SmartTradeSoftware (Record #817) flagged for illegal options advisory',
+      riskAssessment: 'CRITICAL',
       timestamp: '10:32:04',
       targetTab: 'scam-detector',
     },
     {
       id: 'act-2',
       vector: 'Transaction',
-      incidentSummary: 'High-velocity ₹85k transfer to unverified VPA handle',
-      riskAssessment: 'HIGH RISK',
+      incidentSummary: 'Direct ₹45,000 transfer to tradekaropay.com (Official NSE Caution Blacklist #727)',
+      riskAssessment: 'CRITICAL',
       timestamp: '09:14:22',
       targetTab: 'transaction-security',
     },
     {
       id: 'act-3',
-      vector: 'Investigation',
-      incidentSummary: 'Pre-IPO allocation email soliciting immediate deposit',
+      vector: 'Investment',
+      incidentSummary: 'Malicious broker clone APK detected: MODMA.apk (NSE Record #775 / #786)',
       riskAssessment: 'CRITICAL',
       timestamp: 'Yesterday',
       targetTab: 'scam-detector',
@@ -129,7 +137,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     {
       id: 'act-4',
       vector: 'Transaction',
-      incidentSummary: 'Offshore payment gateway debit of ₹35,000 during off-hours',
+      incidentSummary: 'Offshore payment gateway debit of ₹35,000 during off-hours (RBI Banking Frauds Watchlist)',
       riskAssessment: 'MODERATE',
       timestamp: '2 days ago',
       targetTab: 'transaction-security',
@@ -137,7 +145,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     {
       id: 'act-5',
       vector: 'Investment',
-      incidentSummary: 'SEBI registered research analyst report on public banking sector',
+      incidentSummary: 'SEBI registered research analyst report on public banking sector (Statutory Disclosures Verified)',
       riskAssessment: 'CLEARED',
       timestamp: '3 days ago',
       targetTab: 'scam-detector',
@@ -213,6 +221,75 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
           <div className="mono text-[#71717a]">
             Interceptions Generated
+          </div>
+        </div>
+      </div>
+
+      {/* Ground-Truth Regulatory Dataset Telemetry Banner (All CSV Data Ingested into Model) */}
+      <div className="border border-[#1a1a1a] bg-white p-5 sm:p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e4e4e7] pb-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center bg-[#1a1a1a] text-white">
+              <Database className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="mono text-xs font-bold text-[#1a1a1a] uppercase tracking-wider">
+                  Ground-Truth Regulatory Intelligence (All CSV Data Ingested)
+                </span>
+                <span className="status-pill text-[#10b981] border-[#10b981] text-[0.6rem] py-0.5">
+                  100% INGESTED
+                </span>
+              </div>
+              <p className="text-xs text-[#71717a] mt-0.5">
+                Processed, normalized, and actively indexed inside the Gemini AI prompt context and deterministic NLP rules engine.
+              </p>
+            </div>
+          </div>
+
+          {onNavigateToResearchLab && (
+            <button
+              onClick={onNavigateToResearchLab}
+              className="mono text-xs border border-[#1a1a1a] px-3 py-1.5 bg-[#ffffff] hover:bg-[#1a1a1a] hover:text-white transition-colors cursor-pointer self-start md:self-auto inline-flex items-center gap-1.5 shrink-0"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              <span>Explore Cleaned & Raw CSVs</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1 text-xs">
+          <div className="border-l-2 border-[#1a1a1a] pl-3">
+            <div className="mono text-[0.65rem] text-[#71717a]">Total Ingested Records</div>
+            <div className="mono text-lg font-bold text-[#1a1a1a] mt-0.5">
+              {REGULATORY_INTELLIGENCE_RECORDS.length} Records
+            </div>
+            <div className="text-[0.65rem] text-[#71717a]">Across NSE, RBI, SEBI</div>
+          </div>
+
+          <div className="border-l-2 border-[#be123c] pl-3">
+            <div className="mono text-[0.65rem] text-[#71717a]">NSE Caution Blacklist</div>
+            <div className="mono text-lg font-bold text-[#be123c] mt-0.5">
+              {BLACKLISTED_MALICIOUS_ENTITIES.length} Entities
+            </div>
+            <div className="text-[0.65rem] text-[#71717a]">APKs, Telegram, Web Clones</div>
+          </div>
+
+          <div className="border-l-2 border-[#2563eb] pl-3">
+            <div className="mono text-[0.65rem] text-[#71717a]">RBI Banking Frauds</div>
+            <div className="mono text-lg font-bold text-[#2563eb] mt-0.5">
+              ₹18,674 Cr
+            </div>
+            <div className="text-[0.65rem] text-[#71717a]">122 Reclassified Cases</div>
+          </div>
+
+          <div className="border-l-2 border-[#10b981] pl-3">
+            <div className="mono text-[0.65rem] text-[#71717a]">SEBI 2025 Demographics</div>
+            <div className="mono text-lg font-bold text-[#10b981] mt-0.5">
+              85% Safety Mandate
+            </div>
+            <div className="text-[0.65rem] text-[#71717a]">Silver Gen & Gender Baseline</div>
           </div>
         </div>
       </div>

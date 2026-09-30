@@ -171,6 +171,42 @@ export const IntelSidebar: React.FC<IntelSidebarProps> = ({
         </div>
       </div>
 
+      {/* Live Regulatory Watchlist (NSE / SEBI Feed) */}
+      <div className="border border-[#1a1a1a] bg-white p-4">
+        <div className="flex items-center justify-between">
+          <span className="mono text-[0.65rem] text-[#71717a] uppercase font-bold">
+            NSE Caution Watchlist
+          </span>
+          <span className="bg-rose-100 text-rose-800 border border-rose-300 px-1.5 py-0.2 mono text-[9px] font-bold">
+            270 Flagged
+          </span>
+        </div>
+        <p className="mt-1 text-[11px] text-[#71717a]">
+          Latest entities flagged for client fraud complaints:
+        </p>
+        <div className="mt-2.5 space-y-1.5 font-mono text-[10px]">
+          <div className="flex items-center justify-between p-1.5 border border-[#e4e4e7] bg-[#fdfdfc]">
+            <span className="truncate max-w-[140px] text-slate-800 font-bold">t.me/SmartTrade</span>
+            <span className="text-rose-600 font-bold">NSE #817</span>
+          </div>
+          <div className="flex items-center justify-between p-1.5 border border-[#e4e4e7] bg-[#fdfdfc]">
+            <span className="truncate max-w-[140px] text-slate-800 font-bold">MODMA APK App</span>
+            <span className="text-rose-600 font-bold">NSE #786</span>
+          </div>
+          <div className="flex items-center justify-between p-1.5 border border-[#e4e4e7] bg-[#fdfdfc]">
+            <span className="truncate max-w-[140px] text-slate-800 font-bold">mofslmaxs.com</span>
+            <span className="text-rose-600 font-bold">NSE #804</span>
+          </div>
+        </div>
+        <button
+          onClick={() => onNavigateTab('research-lab')}
+          className="mt-3 flex w-full items-center justify-between border border-[#1a1a1a] bg-white px-2.5 py-1.5 mono text-[0.65rem] font-bold text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white transition-colors cursor-pointer"
+        >
+          <span>Explore All 278 Records</span>
+          <ArrowUpRight className="h-3 w-3" />
+        </button>
+      </div>
+
       {/* Stat 4: Protection Policy */}
       <div className="border border-[#1a1a1a] bg-[#ffffff] p-4">
         <div className="flex items-center gap-1.5 text-xs font-bold text-[#1a1a1a]">

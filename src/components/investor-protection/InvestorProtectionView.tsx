@@ -12,12 +12,16 @@ import {
   Shield,
   Layers,
   FileCheck,
+  Users,
+  PieChart,
 } from 'lucide-react';
 import { INVESTOR_ASSESSMENT_QUESTIONS, SCAM_JOURNEY_STAGES } from '../../data/mockData';
 import { InvestorProfileResult } from '../../types';
+import { SEBI_DEMOGRAPHIC_METRICS } from '../../data/cleanedIntelligence';
 
 export const InvestorProtectionView: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'assessment' | 'journey'>('assessment');
+  const [activeTab, setActiveTab] = useState<'assessment' | 'journey' | 'sebi-demographics'>('assessment');
+  const [selectedCohort, setSelectedCohort] = useState<'Silver Gen' | 'Millennials' | 'Gen Z' | 'Gen X'>('Silver Gen');
 
   // Assessment Question Answers: key = questionId, value = optionIndex
   const [answers, setAnswers] = useState<Record<string, number>>({
@@ -138,6 +142,18 @@ export const InvestorProtectionView: React.FC = () => {
             >
               <Compass className="h-4 w-4" />
               <span>Scam Escalation Simulator</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('sebi-demographics')}
+              className={`flex items-center gap-2 border-b-2 px-3.5 py-2 text-xs font-bold transition-colors ${
+                activeTab === 'sebi-demographics'
+                  ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40 rounded-t-lg'
+                  : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Users className="h-4 w-4" />
+              <span>SEBI 2025 Demographic Risk Benchmarks</span>
             </button>
           </div>
         </div>
@@ -408,6 +424,175 @@ export const InvestorProtectionView: React.FC = () => {
                 <span>Next Stage</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: SEBI 2025 DEMOGRAPHIC RISK BENCHMARKS */}
+      {activeTab === 'sebi-demographics' && (
+        <div className="space-y-6">
+          {/* Top Metric Highlights */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+              <span className="mono text-[11px] text-slate-500">SEBI Survey Record</span>
+              <p className="text-xl font-bold text-slate-900 mt-1">Silver Generation</p>
+              <div className="mt-2 flex items-baseline gap-1 text-emerald-700">
+                <span className="text-2xl font-black font-mono-numbers">85%</span>
+                <span className="text-xs">prioritize capital safety</span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                SEBI Record #4: Seniors demand maximum capital preservation.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+              <span className="mono text-[11px] text-slate-500">Gender Risk Variance</span>
+              <p className="text-xl font-bold text-slate-900 mt-1">Risk Aversion</p>
+              <div className="mt-2 flex items-baseline gap-1 text-indigo-700">
+                <span className="text-2xl font-black font-mono-numbers">82% vs 78%</span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                SEBI Record #5: 82% women prefer low-risk vs 78% men.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+              <span className="mono text-[11px] text-slate-500">Millennial Cohort</span>
+              <p className="text-xl font-bold text-slate-900 mt-1">Market Participation</p>
+              <div className="mt-2 flex items-baseline gap-1 text-blue-700">
+                <span className="text-2xl font-black font-mono-numbers">11%</span>
+                <span className="text-xs">highest equity rate</span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                SEBI Record #1: Millennials lead overall securities participation.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+              <span className="mono text-[11px] text-slate-500">Gen Z Cohort</span>
+              <p className="text-xl font-bold text-slate-900 mt-1">Direct Stocks</p>
+              <div className="mt-2 flex items-baseline gap-1 text-purple-700">
+                <span className="text-2xl font-black font-mono-numbers">5%</span>
+                <span className="text-xs">direct equities</span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                SEBI Record #3: Rapidly onboarding via digital discount brokers.
+              </p>
+            </div>
+          </div>
+
+          {/* Interactive Cohort Explorer */}
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
+                SEBI Demographic Profiler & Guardrail Simulator
+              </h3>
+              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                Select an investor demographic cohort to observe empirical securities adoption rates, prevalent fraud vectors, and VIGILEN automated behavioral guardrails.
+              </p>
+            </div>
+
+            {/* Cohort Selector Pills */}
+            <div className="flex flex-wrap gap-2">
+              {(['Silver Gen', 'Millennials', 'Gen Z', 'Gen X'] as const).map((cohort) => (
+                <button
+                  key={cohort}
+                  onClick={() => setSelectedCohort(cohort)}
+                  className={`rounded-lg border px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
+                    selectedCohort === cohort
+                      ? 'border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-2xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400'
+                  }`}
+                >
+                  {cohort} {cohort === 'Silver Gen' ? '(Age 55+)' : cohort === 'Millennials' ? '(Age 28-43)' : cohort === 'Gen Z' ? '(Age 18-27)' : '(Age 44-54)'}
+                </button>
+              ))}
+            </div>
+
+            {/* Cohort Breakdown Card */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <span className="mono text-[10px] text-slate-500">Securities Market Penetration</span>
+                <div className="mt-2 space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-600">Overall Securities Market:</span>
+                    <span className="font-mono font-bold text-slate-900">
+                      {selectedCohort === 'Millennials' ? '11%' : selectedCohort === 'Gen Z' ? '9%' : selectedCohort === 'Gen X' ? '8%' : '6%'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-600">Mutual Funds / ETFs:</span>
+                    <span className="font-mono font-bold text-slate-900">
+                      {selectedCohort === 'Millennials' ? '8%' : selectedCohort === 'Gen Z' ? '6%' : selectedCohort === 'Gen X' ? '6%' : '4%'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-600">Direct Stocks / Equities:</span>
+                    <span className="font-mono font-bold text-slate-900">
+                      {selectedCohort === 'Millennials' ? '6%' : selectedCohort === 'Gen Z' ? '5%' : selectedCohort === 'Gen X' ? '4%' : '3%'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <span className="mono text-[10px] text-slate-500">Primary Risk Vulnerability</span>
+                <p className="mt-2 text-xs text-slate-800 leading-relaxed font-medium">
+                  {selectedCohort === 'Silver Gen'
+                    ? 'Senior citizens are predominantly targeted via fake PMS clones (e.g. Motilal/CRTrade clones), fake institutional quota IPOs, and unverified phone/WhatsApp advisors offering "safe guaranteed fixed pensions".'
+                    : selectedCohort === 'Millennials'
+                    ? 'Targeted by high-pressure Telegram options channels, algorithmic intraday bots, and pre-IPO discount links promising 40%+ weekly gains.'
+                    : selectedCohort === 'Gen Z'
+                    ? 'Targeted through social media influencers, Instagram trading courses, fake crypto staking bots, and unauthorized APK links.'
+                    : 'Targeted via unregistered wealth management schemes, unlisted pre-IPO allotments, and tax-saving corporate bond clones.'}
+                </p>
+              </div>
+
+              <div>
+                <span className="mono text-[10px] text-slate-500">VIGILEN Automated Protective Rule</span>
+                <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50/80 p-3 text-xs text-emerald-950">
+                  <p className="font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-700 shrink-0" />
+                    <span>
+                      {selectedCohort === 'Silver Gen'
+                        ? 'Enforce Zero-Guaranteed-Return Mandate'
+                        : selectedCohort === 'Millennials'
+                        ? 'High-Velocity Transfer Verification'
+                        : 'Unverified Social Handle Interception'}
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-emerald-900/90 mt-1 leading-normal">
+                    {selectedCohort === 'Silver Gen'
+                      ? 'Automatically triggers critical warning on any communication lacking statutory SEBI risk disclosures or demanding peer UPI transfers.'
+                      : selectedCohort === 'Millennials'
+                      ? 'Requires step-up authentication when transfer velocity exceeds 2x daily baseline to first-time beneficiaries.'
+                      : 'Cross-checks social handles and Telegram URLs against the 270+ official NSE caution blacklist.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Official SEBI Survey Data Table */}
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">
+              Source Records: SEBI Investor Survey 2025
+            </h4>
+            <div className="space-y-2">
+              {SEBI_DEMOGRAPHIC_METRICS.map((metric) => (
+                <div key={metric.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 text-xs gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded bg-emerald-100 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-800">
+                      {metric.id}
+                    </span>
+                    <span className="font-bold text-slate-900">{metric.rawEntity}</span>
+                  </div>
+                  <div className="text-slate-700 font-mono text-[11px] bg-white px-2.5 py-1 rounded border border-slate-200">
+                    {metric.description}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

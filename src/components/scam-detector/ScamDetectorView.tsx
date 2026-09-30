@@ -387,6 +387,46 @@ export const ScamDetectorView: React.FC<ScamDetectorViewProps> = ({
             </div>
           </div>
 
+          {/* OFFICIAL REGULATORY BLACKLIST MATCH BANNER */}
+          {activeResult.matchedRegulatoryRecord && (
+            <div className="rounded-xl border-2 border-rose-600 bg-rose-50/90 p-5 shadow-xs text-rose-950">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rose-200 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="rounded bg-rose-600 px-2.5 py-0.5 font-mono text-[11px] font-black text-white uppercase tracking-wider">
+                    CRITICAL REGULATORY ALERT
+                  </span>
+                  <span className="font-mono text-xs font-bold text-rose-900">
+                    OFFICIAL {activeResult.matchedRegulatoryRecord.sourceAgency} CAUTION BLACKLIST MATCH (#{activeResult.matchedRegulatoryRecord.sourceRecordId})
+                  </span>
+                </div>
+                <span className="rounded bg-rose-100 px-3 py-1 font-mono text-xs font-bold text-rose-800 border border-rose-300">
+                  ACTION: {activeResult.matchedRegulatoryRecord.recommendedAction}
+                </span>
+              </div>
+              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <p className="font-bold text-rose-950 uppercase tracking-wider text-[11px]">Flagged Entity / Channel:</p>
+                  <p className="font-mono text-xs mt-1 bg-white p-2 rounded border border-rose-200 text-rose-950 break-all select-all font-semibold">
+                    {activeResult.matchedRegulatoryRecord.rawEntity}
+                  </p>
+                  <p className="mt-1.5 text-[11px] text-rose-800">
+                    Platform Category: <span className="font-bold">{activeResult.matchedRegulatoryRecord.channelPlatform}</span> · Threat:{' '}
+                    <span className="font-bold">{activeResult.matchedRegulatoryRecord.threatClassification.replace(/_/g, ' ')}</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="font-bold text-rose-950 uppercase tracking-wider text-[11px]">Official Label Basis & Source:</p>
+                  <p className="mt-1 text-slate-800 bg-white p-2 rounded border border-rose-200 leading-relaxed text-[11px]">
+                    {activeResult.matchedRegulatoryRecord.labelBasis}
+                  </p>
+                  <p className="mt-1 text-[10px] text-slate-500 italic">
+                    Source list: {activeResult.matchedRegulatoryRecord.sourceAgency} consolidated caution list (client complaint adjudications).
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Section: EXTRACTED TEXT (for screenshots) */}
           {activeResult.inputText && (
             <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
