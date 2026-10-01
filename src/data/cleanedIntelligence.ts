@@ -5325,25 +5325,26 @@ export function matchBlacklistedEntity(input: string): RegulatoryIntelligenceRec
   const cleaned = input.toLowerCase().trim();
   const stripped = cleaned.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
 
-  // 1. Direct match by search token or normalized entity
-  for (const item of BLACKLISTED_MALICIOUS_ENTITIES) {
-    const rawLower = item.rawEntity.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
-    const normLower = item.normalizedEntity.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
-    const token = item.searchToken.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
+  const genericPlatformTokens = new Set([
+    'youtube.com',
+    'youtu.be',
+    't.me',
+    'telegram.me',
+    'google.com',
+    'drive.google.com',
+    'whatsapp.com',
+    'bit.ly',
+    'tinyurl.com',
+    'grow',
+    'growth',
+    'market',
+    'markets',
+    'equity',
+    'equities',
+    'bank',
+    'banking',
+  ]);
 
-    // Check full string inclusions or domain matches
-    if (token.length > 3 && (cleaned.includes(token) || stripped === token)) {
-      return item;
-    }
-    if (normLower.length > 3 && (cleaned.includes(normLower) || stripped === normLower)) {
-      return item;
-    }
-    if (rawLower.length > 3 && (cleaned.includes(rawLower) || stripped === rawLower)) {
-      return item;
-    }
-  }
-
-  // 2. Specific app/brand names checking
   const commonStopWords = new Set([
     'application',
     'app',
@@ -5365,15 +5366,77 @@ export function matchBlacklistedEntity(input: string): RegulatoryIntelligenceRec
     'india',
     'stock',
     'stocks',
+    'grow',
+    'growth',
+    'market',
+    'equity',
+    'bank',
+    'money',
+    'wealth',
+    'super',
+    'smart',
+    'share',
   ]);
 
+  function escapeRegex(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // 1. Direct match by search token or normalized entity
+  for (const item of BLACKLISTED_MALICIOUS_ENTITIES) {
+    const rawLower = item.rawEntity.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
+    const normLower = item.normalizedEntity.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
+    const token = item.searchToken.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
+
+    // Skip generic platform/dictionary tokens from broad inclusion match
+    if (token.length >= 4 && !genericPlatformTokens.has(token) && !commonStopWords.has(token)) {
+      if (token.includes('/') || token.includes('.') || token.includes('@') || token.includes('-')) {
+        if (cleaned.includes(token) || stripped === token) {
+          return item;
+        }
+      } else {
+        const regex = new RegExp(`\\b${escapeRegex(token)}\\b`, 'i');
+        if (regex.test(cleaned) || stripped === token) {
+          return item;
+        }
+      }
+    }
+
+    // Full handle / specific path match for YouTube / Telegram / Web entities
+    if (normLower.length >= 5 && !genericPlatformTokens.has(normLower) && !commonStopWords.has(normLower)) {
+      if (normLower.includes('/') || normLower.includes('.') || normLower.includes('@')) {
+        if (cleaned.includes(normLower) || stripped === normLower) {
+          return item;
+        }
+      } else {
+        const regex = new RegExp(`\\b${escapeRegex(normLower)}\\b`, 'i');
+        if (regex.test(cleaned) || stripped === normLower) {
+          return item;
+        }
+      }
+    }
+
+    if (rawLower.length >= 5 && !genericPlatformTokens.has(rawLower) && !commonStopWords.has(rawLower)) {
+      if (rawLower.includes('/') || rawLower.includes('.') || rawLower.includes('@')) {
+        if (cleaned.includes(rawLower) || stripped === rawLower) {
+          return item;
+        }
+      } else {
+        const regex = new RegExp(`\\b${escapeRegex(rawLower)}\\b`, 'i');
+        if (regex.test(cleaned) || stripped === rawLower) {
+          return item;
+        }
+      }
+    }
+  }
+
+  // 2. Specific distinctive app/brand names checking (must have at least 5 letters and not a stop word)
   for (const item of BLACKLISTED_MALICIOUS_ENTITIES) {
     if (item.channelPlatform === 'Mobile_App' || item.channelPlatform === 'Android_APK') {
       const cleanName = item.rawEntity.replace(/[^a-zA-Z0-9]/g, ' ').toLowerCase();
-      const words = cleanName.split(/\s+/).filter((w) => w.length >= 4);
+      const words = cleanName.split(/\s+/).filter((w) => w.length >= 5 && !commonStopWords.has(w));
       for (const w of words) {
-        if (commonStopWords.has(w)) continue;
-        const regex = new RegExp(`\\b${w}\\b`, 'i');
+        const regex = new RegExp(`\\b${escapeRegex(w)}\\b`, 'i');
         if (regex.test(cleaned)) {
           return item;
         }

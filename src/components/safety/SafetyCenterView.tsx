@@ -28,18 +28,23 @@ export const SafetyCenterView: React.FC = () => {
   const samplePresets = [
     {
       type: 'Website' as const,
-      input: 'mofslmaxs.com',
-      label: 'mofslmaxs.com (Fake Clone)',
-    },
-    {
-      type: 'Website' as const,
-      input: 'https://www.motilaloswal.com',
-      label: 'motilaloswal.com (Official Broker)',
-    },
-    {
-      type: 'Website' as const,
       input: 'https://zerodha.com',
       label: 'zerodha.com (Official Broker)',
+    },
+    {
+      type: 'Website' as const,
+      input: 'https://sebi.gov.iin',
+      label: 'sebi.gov.iin (Possible Look-Alike)',
+    },
+    {
+      type: 'Website' as const,
+      input: 'https://www.sebi.gov.in',
+      label: 'sebi.gov.in (Official Regulator)',
+    },
+    {
+      type: 'Website' as const,
+      input: 'mofslmaxs.com',
+      label: 'mofslmaxs.com (Known Risk Clone)',
     },
     {
       type: 'Promoter' as const,
@@ -47,9 +52,9 @@ export const SafetyCenterView: React.FC = () => {
       label: 'SmartTrade (NSE Flagged #817)',
     },
     {
-      type: 'Investment platform' as const,
-      input: 'tradekaropay.com',
-      label: 'tradekaropay (NSE Flagged #727)',
+      type: 'Website' as const,
+      input: 'https://example-global-invest.org',
+      label: 'example-invest.org (Unverified)',
     },
   ];
 
@@ -202,48 +207,60 @@ export const SafetyCenterView: React.FC = () => {
                   {result.sourceProvided}
                 </h3>
                 <span className="mono text-xs text-[#71717a]">
-                  Category: {result.sourceType} {result.officialEntityName ? `· Entity: ${result.officialEntityName}` : ''}
+                  Category: {result.sourceType} {result.officialEntityName ? `· Entity: ${result.officialEntityName}` : ''} {result.registrationNumber ? `· ${result.registrationNumber}` : ''}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
                 <span
-                  className={`status-pill ${
-                    result.verificationStatus === 'Verified'
-                      ? 'text-[#10b981] border-[#10b981]'
-                      : result.verificationStatus === 'Suspicious'
-                      ? 'text-[#be123c] border-[#be123c]'
-                      : 'text-[#ea580c] border-[#ea580c]'
+                  className={`status-pill font-bold ${
+                    result.verificationStatus === 'VERIFIED'
+                      ? 'text-[#10b981] border-[#10b981] bg-[#10b981]/10'
+                      : result.verificationStatus === 'KNOWN RISK'
+                      ? 'text-[#be123c] border-[#be123c] bg-[#be123c]/10'
+                      : result.verificationStatus === 'SUSPICIOUS'
+                      ? 'text-[#d97706] border-[#d97706] bg-[#f59e0b]/10'
+                      : 'text-[#71717a] border-[#71717a] bg-[#f4f4f5]'
                   }`}
                 >
-                  {result.verificationStatus.toUpperCase()}
+                  {result.verificationStatus === 'VERIFIED'
+                    ? 'LOW / VERIFIED'
+                    : result.verificationStatus}
                 </span>
               </div>
             </div>
 
-            {/* Canonical Official Website Card (Primary Google Engine Output) */}
+            {/* WEBSITE IDENTITY & IMPERSONATION CHECK Card */}
             {result.canonicalOfficialWebsite && (
               <div className={`border p-5 ${
-                result.isOfficialWebsite
+                result.verificationStatus === 'VERIFIED'
                   ? 'border-[#10b981] bg-emerald-50/40 text-[#065f46]'
-                  : result.verificationStatus === 'Suspicious'
+                  : result.verificationStatus === 'KNOWN RISK'
                   ? 'border-[#be123c] bg-rose-50/40 text-[#9f1239]'
+                  : result.verificationStatus === 'SUSPICIOUS'
+                  ? 'border-[#d97706] bg-amber-50/50 text-[#92400e]'
                   : 'border-[#1a1a1a] bg-white text-[#1a1a1a]'
               }`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-current/20 pb-3 mb-3">
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4 shrink-0" />
                     <span className="mono text-xs font-bold uppercase tracking-wider">
-                      Google Engine Canonical Website Identification
+                      WEBSITE IDENTITY & IMPERSONATION CHECK
                     </span>
                   </div>
                   <span className="mono text-[10px] font-bold uppercase border border-current px-2 py-0.5">
-                    {result.isOfficialWebsite ? 'Authentic Official Domain' : 'Clone / Mimicry / Unofficial'}
+                    {result.verificationStatus === 'VERIFIED'
+                      ? 'Authoritative Official Registry Match'
+                      : result.verificationStatus === 'KNOWN RISK'
+                      ? 'Official Warning / Blacklist Match'
+                      : result.verificationStatus === 'SUSPICIOUS'
+                      ? 'Possible Look-Alike / Impersonation'
+                      : 'Unverified / Insufficient Evidence'}
                   </span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <div className="flex items-baseline gap-2">
+                  <div className="flex flex-wrap items-baseline gap-2">
                     <span className="text-xs font-bold">Authentic Official Website:</span>
                     <a
                       href={result.canonicalOfficialWebsite.startsWith('http') ? result.canonicalOfficialWebsite : `https://${result.canonicalOfficialWebsite}`}
@@ -254,6 +271,11 @@ export const SafetyCenterView: React.FC = () => {
                       <span>{result.canonicalOfficialWebsite}</span>
                       <ExternalLink className="h-3 w-3" />
                     </a>
+                    {result.registrationNumber && (
+                      <span className="mono text-[11px] bg-black/5 px-2 py-0.5 border border-current/20 font-bold ml-2">
+                        {result.registrationNumber}
+                      </span>
+                    )}
                   </div>
 
                   {result.summary && (

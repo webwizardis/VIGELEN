@@ -20,14 +20,10 @@ import {
 
 interface DashboardViewProps {
   systemStatus?: SystemStatus;
-  openCasesCount?: number;
   onNavigateToScamDetector: () => void;
   onNavigateToTransactionSecurity: () => void;
-  onNavigateToCases: () => void;
-  onNavigateToReports: () => void;
   onNavigateToLanding?: () => void;
   onNavigateToResearchLab?: () => void;
-  onNavigateToRiskProfile?: () => void;
 }
 
 interface ActivityItem {
@@ -96,9 +92,7 @@ const generate30DayHistoricalData = (): HistoricalRiskDataPoint[] => {
 export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateToScamDetector,
   onNavigateToTransactionSecurity,
-  onNavigateToCases,
   onNavigateToResearchLab,
-  onNavigateToRiskProfile,
 }) => {
   const [timeRange, setTimeRange] = useState<'30D' | '14D' | '7D'>('30D');
   const [activeVector, setActiveVector] = useState<'all' | 'content' | 'transaction' | 'behavioral'>('all');
@@ -185,53 +179,56 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             Check Transactions
           </button>
 
-          <button
-            onClick={onNavigateToCases}
-            className="btn"
-          >
-            View Casebook
-          </button>
-
-          {onNavigateToRiskProfile && (
+          {onNavigateToResearchLab && (
             <button
-              onClick={onNavigateToRiskProfile}
+              onClick={onNavigateToResearchLab}
               className="btn"
             >
-              Investor Risk Profile
+              Model Research Lab
             </button>
           )}
         </div>
       </div>
 
       {/* Variation 12 Dashboard Grid (Metric Cards) */}
-      <div className="dashboard-grid grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10">
-        <div className="metric-card border-t border-[#1a1a1a] pt-4">
-          <div className="mono text-[#71717a]">Content Scans</div>
-          <div className="font-serif text-[3rem] font-semibold text-[#1a1a1a] my-2 leading-none">
-            142
-          </div>
-          <div className="mono text-[#2563eb]">
-            +14.2% Month Over Month
-          </div>
+      <div>
+        <div className="flex items-center justify-between mb-3 border-b border-[#e4e4e7] pb-2">
+          <span className="mono text-xs font-bold text-[#1a1a1a] uppercase tracking-wider">
+            Aggregate Surveillance Telemetry
+          </span>
+          <span className="mono text-[10px] bg-[#f4f4f5] border border-[#e4e4e7] px-2 py-0.5 text-[#71717a] font-bold">
+            PROTOTYPE DEMO DATA
+          </span>
         </div>
+        <div className="dashboard-grid grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10">
+          <div className="metric-card border-t border-[#1a1a1a] pt-4">
+            <div className="mono text-[#71717a]">Content Scans</div>
+            <div className="font-serif text-[3rem] font-semibold text-[#1a1a1a] my-2 leading-none">
+              142
+            </div>
+            <div className="mono text-[#2563eb]">
+              +14.2% Month Over Month
+            </div>
+          </div>
 
-        <div className="metric-card border-t border-[#1a1a1a] pt-4">
-          <div className="mono text-[#71717a]">Capital Protected</div>
-          <div className="font-serif text-[3rem] font-semibold text-[#1a1a1a] my-2 leading-none">
-            ₹42.8L
+          <div className="metric-card border-t border-[#1a1a1a] pt-4">
+            <div className="mono text-[#71717a]">Capital Protected</div>
+            <div className="font-serif text-[3rem] font-semibold text-[#1a1a1a] my-2 leading-none">
+              ₹42.8L
+            </div>
+            <div className="mono text-[#71717a]">
+              Across 88 Inquiries
+            </div>
           </div>
-          <div className="mono text-[#71717a]">
-            Across 88 Inquiries
-          </div>
-        </div>
 
-        <div className="metric-card border-t border-[#1a1a1a] pt-4">
-          <div className="mono text-[#71717a]">High-Risk Alerts</div>
-          <div className="font-serif text-[3rem] font-semibold text-[#be123c] my-2 leading-none">
-            18
-          </div>
-          <div className="mono text-[#71717a]">
-            Interceptions Generated
+          <div className="metric-card border-t border-[#1a1a1a] pt-4">
+            <div className="mono text-[#71717a]">High-Risk Alerts</div>
+            <div className="font-serif text-[3rem] font-semibold text-[#be123c] my-2 leading-none">
+              18
+            </div>
+            <div className="mono text-[#71717a]">
+              Interceptions Generated
+            </div>
           </div>
         </div>
       </div>

@@ -251,7 +251,24 @@ export function analyzeTextContent(text: string, inputType: 'text' | 'screenshot
     signals.push({ label: 'Contains verified regulatory disclosure', impact: 25, direction: 'decreases_risk' });
   }
 
-  // 7. Dataset-Trained Statistical Model Inference (Trained on 278 Regulatory Records)
+  // 9. Suspicious URL / Link / APK check
+  const suspiciousUrlMatch = text.match(/(bit\.ly\/|tinyurl\.com\/|t\.me\/|\.apk|obs\.ap-southeast|\.site|\.vip|\.top|\.click|http:\/\/\d+\.\d+\.\d+\.\d+|mofslmaxs\.com|tradekaropay\.com)/i);
+  if (suspiciousUrlMatch) {
+    score += 20;
+    indicators.push({
+      id: 'ind-suspicious-url',
+      category: 'UNVERIFIED_SOURCE',
+      label: 'Suspicious URL',
+      description: `Communication directs users to shortened link, unverified domain, or direct APK download (${suspiciousUrlMatch[0]}).`,
+      severity: 'high',
+      confidence: 0.93,
+      highlightText: suspiciousUrlMatch[0],
+      contributionScore: 20,
+    });
+    signals.push({ label: 'Suspicious URL or direct APK download link', impact: 20, direction: 'increases_risk' });
+  }
+
+  // 10. Dataset-Trained Statistical Model Inference (Trained on Regulatory Intelligence Dataset)
   const trainedModelInference = predictWithTrainedModel(text);
   if (trainedModelInference.activatedFeatures.length > 0 && !matchedRecord) {
     indicators.push({
@@ -271,9 +288,16 @@ export function analyzeTextContent(text: string, inputType: 'text' | 'screenshot
     });
   }
 
-  const finalScore = matchedRecord
+  // Ground-truth statutory disclosures or authentic registry match should be strictly LOW risk
+  const isLegitimateCompliant = hasRiskDisclosure && !guaranteeMatch && !upiMatch && !matchedRecord;
+  let finalScore = matchedRecord
     ? 100
     : Math.min(100, Math.max(5, Math.round((trainedModelInference.riskScore * 0.55) + (score * 0.45))));
+
+  if (isLegitimateCompliant) {
+    finalScore = Math.min(15, finalScore);
+  }
+
   const riskLevel = determineRiskLevel(finalScore);
 
   let classification = 'Potentially Suspicious Investment Content';
@@ -284,12 +308,42 @@ export function analyzeTextContent(text: string, inputType: 'text' | 'screenshot
   else if (finalScore >= 35) classification = 'Unverified Financial Advisory with Elevated Risk';
   else classification = 'Low-Risk / Regulated Financial Communication';
 
-  const whyFlagged = indicators.map((ind) => `${ind.label}: ${ind.description}`);
+  // Construct structured explanations including reasons for HIGH/CRITICAL cases
+  const highRiskReasons: string[] = [];
+  if (guaranteeMatch) highRiskReasons.push('guaranteed returns');
+  if (urgencyMatch) highRiskReasons.push('urgency');
+  if (upiMatch) highRiskReasons.push('direct payment request');
+  if (contactMatch) highRiskReasons.push('Telegram/WhatsApp promotion');
+  if (imperMatch && !text.includes('Registration No:')) highRiskReasons.push('fake registration claim');
+  if (suspiciousUrlMatch) highRiskReasons.push('suspicious URL');
+
+  const whyFlagged: string[] = [];
+  if (matchedRecord) {
+    whyFlagged.push(`Official ${matchedRecord.sourceAgency} Blacklist Match: ${matchedRecord.rawEntity} (${matchedRecord.threatClassification.replace(/_/g, ' ')})`);
+  }
+  if (highRiskReasons.length > 0) {
+    whyFlagged.push(`Identified key risk drivers: ${highRiskReasons.join(', ')}`);
+  }
+  indicators.forEach((ind) => {
+    whyFlagged.push(`${ind.label}: ${ind.description}`);
+  });
+
   if (whyFlagged.length === 0) {
     whyFlagged.push('No prominent scam signals identified; standard investor prudence advised.');
   }
 
   const claim = extractInvestmentClaim(text);
+
+  let explanationSummary = '';
+  if (matchedRecord) {
+    explanationSummary = `CRITICAL RISK: Entity identified on official ${matchedRecord.sourceAgency} Caution Notice blacklist (#${matchedRecord.sourceRecordId}) for ${matchedRecord.threatClassification.replace(/_/g, ' ')}.`;
+  } else if (riskLevel === 'CRITICAL' || riskLevel === 'HIGH') {
+    explanationSummary = `HIGH/CRITICAL RISK: Flagged due to ${highRiskReasons.join(', ') || 'unregistered speculative claims'}. These patterns violate securities regulations and indicate elevated retail financial loss hazard.`;
+  } else if (riskLevel === 'MEDIUM') {
+    explanationSummary = 'MEDIUM RISK: Moderate caution advised. Content exhibits informal or speculative traits without verified broker credentials.';
+  } else {
+    explanationSummary = 'LOW RISK: Regulated financial communication containing mandatory statutory disclaimers and no deceptive guaranteed return claims.';
+  }
 
   return {
     id: `TX-SCAN-${Date.now().toString(36).toUpperCase()}`,
@@ -304,11 +358,7 @@ export function analyzeTextContent(text: string, inputType: 'text' | 'screenshot
     claim,
     matchedRegulatoryRecord: matchedRecord,
     explanation: {
-      summary: matchedRecord
-        ? `CRITICAL RISK: Entity identified on the official ${matchedRecord.sourceAgency} Caution Notice blacklist (#${matchedRecord.sourceRecordId}) for client complaints involving ${matchedRecord.threatClassification.replace(/_/g, ' ')}.`
-        : finalScore >= 60
-        ? 'Potentially high-risk characteristics detected. Multiple linguistic and procedural signals match documented retail investment frauds.'
-        : 'Low-to-moderate risk profile. Content demonstrates either compliant disclaimers or minimal aggressive solicitation markers.',
+      summary: explanationSummary,
       whyFlagged,
       topSignals: signals.sort((a, b) => b.impact - a.impact),
     },

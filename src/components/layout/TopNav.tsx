@@ -6,7 +6,6 @@ import {
   Menu,
   ArrowLeft,
   ArrowRight,
-  PanelRight,
 } from 'lucide-react';
 import { NotificationItem } from '../../types';
 
@@ -25,9 +24,6 @@ interface TopNavProps {
   nextTabLabel?: string;
   currentTabLabel?: string;
   currentTabCategory?: string;
-  // Intel Sidebar Toggle
-  intelSidebarOpen?: boolean;
-  onToggleIntelSidebar?: () => void;
 }
 
 export const TopNav: React.FC<TopNavProps> = ({
@@ -43,8 +39,6 @@ export const TopNav: React.FC<TopNavProps> = ({
   nextTabLabel,
   currentTabLabel = 'Risk Dashboard',
   currentTabCategory = 'Operations',
-  intelSidebarOpen = true,
-  onToggleIntelSidebar,
 }) => {
   const [helpOpen, setHelpOpen] = useState(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -140,22 +134,6 @@ export const TopNav: React.FC<TopNavProps> = ({
           >
             Protocol Guide
           </button>
-
-          {/* Toggle Intel Sidebar (if provided) */}
-          {onToggleIntelSidebar && (
-            <button
-              onClick={onToggleIntelSidebar}
-              title={intelSidebarOpen ? 'Hide Intel Desk' : 'Show Intel Desk'}
-              className={`hidden xl:flex h-8 items-center gap-1.5 border px-2 text-[0.65rem] mono transition-colors cursor-pointer ${
-                intelSidebarOpen
-                  ? 'border-[#1a1a1a] bg-[#1a1a1a] text-white'
-                  : 'border-[#1a1a1a] bg-white text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white'
-              }`}
-            >
-              <PanelRight className="h-3.5 w-3.5" />
-              <span>Intel Desk</span>
-            </button>
-          )}
 
           {/* Live Indicator */}
           <div className="flex items-center gap-1.5 pl-1.5 border-l border-[#e4e4e7]">

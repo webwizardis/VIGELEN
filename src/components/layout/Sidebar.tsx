@@ -6,11 +6,7 @@ export type NavTabId =
   | 'landing'
   | 'scam-detector'
   | 'transaction-security'
-  | 'risk-profile'
   | 'safety-center'
-  | 'cases'
-  | 'reports'
-  | 'unified-risk'
   | 'research-lab'
   | 'settings'
   | 'privacy';
@@ -27,12 +23,8 @@ export const NAV_TAB_LIST: NavTabMeta[] = [
   { id: 'landing', label: 'Platform Overview', shortLabel: 'Overview', category: 'Operations' },
   { id: 'scam-detector', label: 'Investment Content', shortLabel: 'Content Scan', category: 'Core Screening' },
   { id: 'transaction-security', label: 'Transaction Security', shortLabel: 'Transactions', category: 'Core Screening' },
-  { id: 'risk-profile', label: 'Investor Risk Profile', shortLabel: 'Risk Profile', category: 'Investor Protection' },
   { id: 'safety-center', label: 'Safety Center', shortLabel: 'Safety', category: 'Investor Protection' },
-  { id: 'cases', label: 'Case Management', shortLabel: 'Casebook', category: 'Intelligence & Cases' },
-  { id: 'reports', label: 'Audit Reports', shortLabel: 'Reports', category: 'Intelligence & Cases' },
-  { id: 'unified-risk', label: 'Unified Risk Model', shortLabel: 'Unified Model', category: 'Intelligence & Cases' },
-  { id: 'research-lab', label: 'Model Lab', shortLabel: 'Model Lab', category: 'Intelligence & Cases' },
+  { id: 'research-lab', label: 'Model Lab', shortLabel: 'Model Lab', category: 'Intelligence & Research' },
   { id: 'settings', label: 'System Settings', shortLabel: 'Settings', category: 'System' },
   { id: 'privacy', label: 'Privacy & Security', shortLabel: 'Privacy', category: 'System' },
 ];
@@ -50,7 +42,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setCurrentTab,
   mobileOpen,
   setMobileOpen,
-  casesCount = 3,
 }) => {
   const navSections = [
     {
@@ -70,19 +61,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       title: 'Investor Protection',
       items: [
-        { id: 'risk-profile' as NavTabId, label: 'Investor Risk Profile' },
         { id: 'safety-center' as NavTabId, label: 'Safety Center' },
       ],
     },
     {
-      title: 'Intelligence & Cases',
+      title: 'Intelligence & Research',
       items: [
-        {
-          id: 'cases' as NavTabId,
-          label: `Cases [${String(casesCount).padStart(2, '0')}]`,
-        },
-        { id: 'reports' as NavTabId, label: 'Audit Reports' },
-        { id: 'unified-risk' as NavTabId, label: 'Unified Risk Model' },
         { id: 'research-lab' as NavTabId, label: 'Model Lab' },
       ],
     },

@@ -1,40 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { TopNav } from './components/layout/TopNav';
 import { Sidebar, NavTabId, NAV_TAB_LIST } from './components/layout/Sidebar';
-import { IntelSidebar } from './components/layout/IntelSidebar';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { ScamDetectorView } from './components/scam-detector/ScamDetectorView';
 import { TransactionSecurityView } from './components/transaction-security/TransactionSecurityView';
-import { CaseManagementView } from './components/cases/CaseManagementView';
-import { UnifiedRiskView } from './components/unified-risk/UnifiedRiskView';
-import { InvestorProtectionView } from './components/investor-protection/InvestorProtectionView';
 import { SafetyCenterView } from './components/safety/SafetyCenterView';
 import { ResearchLabView } from './components/research-lab/ResearchLabView';
 import { SettingsView } from './components/settings/SettingsView';
 import { PrivacyCenterView } from './components/privacy-security/PrivacyCenterView';
-import { ReportsView } from './components/reports/ReportsView';
 import { LandingSection } from './components/landing/LandingSection';
 import { ShieldAssistantModal } from './components/assistant/ShieldAssistantModal';
 import { NotificationDrawer } from './components/common/NotificationDrawer';
 import { QuickSearchModal } from './components/common/QuickSearchModal';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import {
-  InvestigationCase,
   NotificationItem,
   SystemStatus,
-  TextAnalysisResult,
-  TransactionAnomalyResult,
 } from './types';
-import { INITIAL_INVESTIGATION_CASES, DEFAULT_SYSTEM_STATUS } from './data/mockData';
+import { DEFAULT_SYSTEM_STATUS } from './data/mockData';
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<NavTabId>('dashboard');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [intelSidebarOpen, setIntelSidebarOpen] = useState(true);
-  const [cases, setCases] = useState<InvestigationCase[]>(INITIAL_INVESTIGATION_CASES);
-  const [selectedCaseId, setSelectedCaseId] = useState<string>(INITIAL_INVESTIGATION_CASES[0]?.id || '');
   const [systemStatus] = useState<SystemStatus>(DEFAULT_SYSTEM_STATUS);
-  const [assessedInvestorRisk, setAssessedInvestorRisk] = useState<number>(70);
 
   // Assistant & Utility Modals
   const [assistantOpen, setAssistantOpen] = useState(false);
@@ -63,12 +51,12 @@ export function App() {
     },
     {
       id: 'notif-3',
-      title: 'Dossier Ready for Submission',
-      description: 'Casebook #VGL-2026-0842 compiled with chronological audit logs.',
-      timestamp: '3 hours ago',
-      type: 'INFO',
+      title: 'Model Registry Calibrated',
+      description: 'Supervised 80/20 benchmark weights refreshed with latest regulatory intelligence.',
+      timestamp: 'Yesterday',
+      type: 'MODEL_EVAL',
       read: true,
-      linkTab: 'cases',
+      linkTab: 'research-lab',
     },
   ]);
 
@@ -110,64 +98,16 @@ export function App() {
       const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
       if (isInput) return;
 
-      if ((e.altKey && e.key === 'ArrowLeft') || e.key === '[') {
-        e.preventDefault();
-        if (canPrevTab && prevTab) setCurrentTab(prevTab.id);
-      } else if ((e.altKey && e.key === 'ArrowRight') || e.key === ']') {
-        e.preventDefault();
-        if (canNextTab && nextTab) setCurrentTab(nextTab.id);
+      if (e.key === '[') {
+        handlePrevTab();
+      } else if (e.key === ']') {
+        handleNextTab();
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [canPrevTab, canNextTab, prevTab, nextTab]);
-
-  // Sync scroll on tab switch
-  useEffect(() => {
-    const mainEl = document.querySelector('main');
-    if (mainEl) mainEl.scrollTop = 0;
-  }, [currentTab]);
-
-  const handleAttachContentToCase = (result: TextAnalysisResult) => {
-    if (cases.length > 0) {
-      const updated = [...cases];
-      const newEvidence = {
-        id: `ev-${Date.now()}`,
-        type: 'CONTENT' as const,
-        title: `Content Extraction: ${result.explanation?.summary?.slice(0, 30) || 'Flagged Message'}`,
-        timestamp: new Date().toISOString().slice(0, 16).replace('T', ' '),
-        summary: result.explanation?.summary || 'Guaranteed returns / deceptive advisory signals',
-        riskScore: result.riskScore,
-        tags: result.indicators.map((i) => i.label),
-      };
-      updated[0].evidence.unshift(newEvidence);
-      updated[0].updatedAt = 'Just now';
-      setCases(updated);
-      setSelectedCaseId(updated[0].id);
-      setCurrentTab('cases');
-    }
-  };
-
-  const handleAttachTransactionToCase = (result: TransactionAnomalyResult) => {
-    if (cases.length > 0) {
-      const updated = [...cases];
-      const detectedAnomalies = result.anomalies.filter((a) => a.detected);
-      const newEvidence = {
-        id: `ev-${Date.now()}`,
-        type: 'TRANSACTION' as const,
-        title: `Transaction Anomaly (Risk ${result.riskScore}/100)`,
-        timestamp: new Date().toISOString().slice(0, 16).replace('T', ' '),
-        summary: result.behavioralComparison?.naturalLanguageReason?.[0] || 'Velocity anomaly flagged pre-transfer',
-        riskScore: result.riskScore,
-        tags: detectedAnomalies.map((a) => a.description),
-      };
-      updated[0].evidence.unshift(newEvidence);
-      updated[0].updatedAt = 'Just now';
-      setCases(updated);
-      setSelectedCaseId(updated[0].id);
-      setCurrentTab('cases');
-    }
-  };
+  }, [currentTabIndex]);
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#fdfdfc] text-[#1a1a1a] transition-colors flex flex-col font-sans">
@@ -186,11 +126,9 @@ export function App() {
         nextTabLabel={nextTab?.label}
         currentTabLabel={currentMeta.shortLabel}
         currentTabCategory={currentMeta.category}
-        intelSidebarOpen={intelSidebarOpen}
-        onToggleIntelSidebar={() => setIntelSidebarOpen((prev) => !prev)}
       />
 
-      {/* Main 3-Column Workspace: Sidebar | Main Content | Intel Sidebar */}
+      {/* Main Workspace: Left Sidebar + Center Primary Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Navigation Sidebar (280px) */}
         <Sidebar
@@ -198,24 +136,19 @@ export function App() {
           setCurrentTab={setCurrentTab}
           mobileOpen={mobileNavOpen}
           setMobileOpen={setMobileNavOpen}
-          casesCount={cases.length}
         />
 
         {/* Center Primary Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto px-6 py-8 sm:px-10 sm:py-12 lg:px-16 lg:py-14">
-          <div className="max-w-5xl">
+          <div className="max-w-5xl mx-auto">
             {/* View Switching */}
             {currentTab === 'dashboard' && (
               <DashboardView
                 systemStatus={systemStatus}
-                openCasesCount={cases.length}
                 onNavigateToScamDetector={() => setCurrentTab('scam-detector')}
                 onNavigateToTransactionSecurity={() => setCurrentTab('transaction-security')}
-                onNavigateToCases={() => setCurrentTab('cases')}
-                onNavigateToReports={() => setCurrentTab('reports')}
                 onNavigateToLanding={() => setCurrentTab('landing')}
                 onNavigateToResearchLab={() => setCurrentTab('research-lab')}
-                onNavigateToRiskProfile={() => setCurrentTab('risk-profile')}
               />
             )}
 
@@ -226,63 +159,18 @@ export function App() {
                 onSelectFeature={(featId) => {
                   if (featId === 'scam-detector') setCurrentTab('scam-detector');
                   else if (featId === 'transaction-security') setCurrentTab('transaction-security');
-                  else if (featId === 'cases') setCurrentTab('cases');
-                  else if (featId === 'risk-profile') setCurrentTab('risk-profile');
+                  else if (featId === 'safety-center') setCurrentTab('safety-center');
+                  else if (featId === 'research-lab') setCurrentTab('research-lab');
                 }}
               />
             )}
 
             {currentTab === 'scam-detector' && (
-              <ScamDetectorView
-                onOpenReport={() => setCurrentTab('reports')}
-                onAttachToCase={handleAttachContentToCase}
-              />
+              <ScamDetectorView />
             )}
 
             {currentTab === 'transaction-security' && (
-              <TransactionSecurityView
-                onAttachToCase={handleAttachTransactionToCase}
-              />
-            )}
-
-            {currentTab === 'cases' && (
-              <CaseManagementView
-                cases={cases}
-                selectedCaseId={selectedCaseId}
-                onSelectCase={(c) => setSelectedCaseId(c.id)}
-                onAddCase={(newCase) => {
-                  setCases((prev) => [newCase, ...prev]);
-                  setSelectedCaseId(newCase.id);
-                }}
-              />
-            )}
-
-            {currentTab === 'reports' && (
-              <ReportsView
-                cases={cases}
-                onNavigateToCase={(caseId) => {
-                  setSelectedCaseId(caseId);
-                  setCurrentTab('cases');
-                }}
-              />
-            )}
-
-            {currentTab === 'unified-risk' && (
-              <UnifiedRiskView
-                initialInvestorRisk={assessedInvestorRisk}
-                onNavigateToRiskProfile={() => setCurrentTab('risk-profile')}
-              />
-            )}
-
-            {currentTab === 'risk-profile' && (
-              <InvestorProtectionView
-                onApplyToUnifiedRisk={(score) => {
-                  setAssessedInvestorRisk(score);
-                  setCurrentTab('unified-risk');
-                }}
-                onNavigateToScamDetector={() => setCurrentTab('scam-detector')}
-                onNavigateToTransactionSecurity={() => setCurrentTab('transaction-security')}
-              />
+              <TransactionSecurityView />
             )}
 
             {currentTab === 'safety-center' && <SafetyCenterView />}
@@ -323,14 +211,6 @@ export function App() {
             </div>
           </div>
         </main>
-
-        {/* Right Intelligence Column (Intel Desk Feature) */}
-        {intelSidebarOpen && (
-          <IntelSidebar
-            openCasesCount={cases.length}
-            onNavigateTab={(tab) => setCurrentTab(tab)}
-          />
-        )}
       </div>
 
       {/* Variation 12 Status Footer Bar */}
@@ -344,11 +224,11 @@ export function App() {
             Network Latency: 14ms
           </div>
           <div className="mono hidden sm:inline-block text-[#71717a]">
-            Registry: v4.2-PROD
+            Registry: v4.2-PROTOTYPE
           </div>
         </div>
         <div className="mono text-[#71717a]">
-          Vigilen &copy; 2024 Regulatory Systems
+          VIGELEN — FINANCIAL RISK ANALYSIS PROTOTYPE
         </div>
       </div>
 
@@ -378,7 +258,7 @@ export function App() {
       <QuickSearchModal
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}
-        onNavigate={(tab) => setCurrentTab(tab)}
+        onSelectTab={(tab: NavTabId) => setCurrentTab(tab)}
       />
     </div>
   );

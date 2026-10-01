@@ -3,11 +3,8 @@ import {
   Search,
   X,
   CreditCard,
-  FolderOpen,
-  Sliders,
   ShieldCheck,
   FlaskConical,
-  FileCheck,
   Settings,
   Lock,
   LayoutDashboard,
@@ -19,15 +16,18 @@ import { NavTabId } from '../layout/Sidebar';
 interface QuickSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (tab: NavTabId) => void;
+  onNavigate?: (tab: NavTabId) => void;
+  onSelectTab?: (tab: NavTabId) => void;
 }
 
 export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
   isOpen,
   onClose,
   onNavigate,
+  onSelectTab,
 }) => {
   const [query, setQuery] = useState('');
+  const handleNav = onNavigate || onSelectTab || (() => {});
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -75,39 +75,11 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
       icon: <CreditCard className="h-4 w-4 text-[#2563eb]" />,
     },
     {
-      title: 'Investor Risk Profile',
-      subtitle: 'Evaluate susceptibility factors & defensive thresholds',
-      category: 'Investor Protection',
-      tab: 'risk-profile' as NavTabId,
-      icon: <ShieldCheck className="h-4 w-4 text-[#2563eb]" />,
-    },
-    {
       title: 'Safety Center',
       subtitle: 'Broker verification & official registry lookups',
       category: 'Investor Protection',
       tab: 'safety-center' as NavTabId,
       icon: <ShieldCheck className="h-4 w-4 text-[#2563eb]" />,
-    },
-    {
-      title: 'Active Case Dossiers',
-      subtitle: 'Investigation evidence compilation and timeline logs',
-      category: 'Intelligence',
-      tab: 'cases' as NavTabId,
-      icon: <FolderOpen className="h-4 w-4 text-[#1a1a1a]" />,
-    },
-    {
-      title: 'Audit Reports & Exports',
-      subtitle: 'Generate formatted evidence summaries for filing',
-      category: 'Intelligence',
-      tab: 'reports' as NavTabId,
-      icon: <FileCheck className="h-4 w-4 text-[#1a1a1a]" />,
-    },
-    {
-      title: 'Unified Risk Model',
-      subtitle: 'Cross-vector Bayesian risk calculation engine',
-      category: 'Intelligence',
-      tab: 'unified-risk' as NavTabId,
-      icon: <Sliders className="h-4 w-4 text-[#1a1a1a]" />,
     },
     {
       title: 'Model Research Lab',
@@ -153,7 +125,7 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
             onKeyDown={(e) => {
               if (e.key === 'Enter' && filtered.length > 0) {
                 e.preventDefault();
-                onNavigate(filtered[0].tab);
+                handleNav(filtered[0].tab);
                 onClose();
               }
             }}
@@ -179,7 +151,7 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
               <button
                 key={idx}
                 onClick={() => {
-                  onNavigate(item.tab);
+                  handleNav(item.tab);
                   onClose();
                 }}
                 className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-white border border-transparent hover:border-[#e4e4e7] group cursor-pointer"

@@ -244,46 +244,68 @@ export const ResearchLabView: React.FC = () => {
       {/* TAB 1: DATASET-TRAINED MODEL & EMPIRICAL TEST SUITE */}
       {activeTab === 'dataset-model' && (
         <div className="space-y-6">
-          {/* Top KPI Scorecards */}
+          {/* Top KPI Scorecards: Fraud Cases, Non-Fraud Cases, Train/Test Split, Metrics */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* 1. Fraud Cases (Class 1) */}
             <div className="border border-[#1a1a1a] bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="mono text-[11px] text-[#71717a]">Dataset Implemented</span>
-                <span className="mono text-[10px] bg-[#1a1a1a] text-white px-2 py-0.5 font-bold">
-                  278 RECORDS
+                <span className="mono text-[11px] text-[#71717a]">Class 1: Fraud Cases</span>
+                <span className="mono text-[10px] bg-[#be123c] text-white px-2 py-0.5 font-bold">
+                  HIGH RISK
                 </span>
               </div>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="mono text-2xl font-bold text-[#1a1a1a]">
-                  {REGULATORY_INTELLIGENCE_RECORDS.length}
+                <span className="mono text-2xl font-bold text-[#be123c]">
+                  {trainingSummary.fraudCasesCount}
                 </span>
-                <span className="text-xs text-[#71717a]">instances ingested</span>
+                <span className="text-xs text-[#71717a]">fraud cases</span>
               </div>
               <p className="mt-1 text-[11px] text-[#71717a]">
-                NSE blacklisted entities, RBI banking losses, SEBI investor demographics.
+                {trainingSummary.trainFraudCount} in Train / {trainingSummary.testFraudCount} in Held-Out Test. NSE caution list + RBI banking fraud cases.
               </p>
             </div>
 
+            {/* 2. Non-Fraud Cases (Class 0) */}
             <div className="border border-[#1a1a1a] bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="mono text-[11px] text-[#71717a]">Partition Strategy</span>
+                <span className="mono text-[11px] text-[#71717a]">Class 0: Non-Fraud Cases</span>
+                <span className="mono text-[10px] bg-[#10b981] text-white px-2 py-0.5 font-bold">
+                  LEGITIMATE
+                </span>
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="mono text-2xl font-bold text-[#10b981]">
+                  {trainingSummary.nonFraudCasesCount}
+                </span>
+                <span className="text-xs text-[#71717a]">non-fraud cases</span>
+              </div>
+              <p className="mt-1 text-[11px] text-[#71717a]">
+                {trainingSummary.trainNonFraudCount} in Train / {trainingSummary.testNonFraudCount} in Held-Out Test. SEBI registered brokers & statutory disclosures.
+              </p>
+            </div>
+
+            {/* 3. Train / Test Split */}
+            <div className="border border-[#1a1a1a] bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="mono text-[11px] text-[#71717a]">Train / Test Split</span>
                 <span className="mono text-[10px] bg-[#f4f4f5] text-[#1a1a1a] border border-[#e4e4e7] px-2 py-0.5 font-bold">
-                  80 / 20 SPLIT
+                  80% / 20%
                 </span>
               </div>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="mono text-2xl font-bold text-[#1a1a1a]">
-                  {trainSet.length} <span className="text-sm font-normal text-[#71717a]">Train</span> / {testSet.length} <span className="text-sm font-normal text-[#71717a]">Test</span>
+                  {trainingSummary.trainSampleSize} <span className="text-sm font-normal text-[#71717a]">Train</span> / {trainingSummary.testSampleSize} <span className="text-sm font-normal text-[#71717a]">Test</span>
                 </span>
               </div>
               <p className="mt-1 text-[11px] text-[#71717a]">
-                Stratified by channel platform and threat taxonomy with zero fold leakage.
+                Total: {trainingSummary.totalDatasetSize} records. Stratified 80/20 partition with zero overlap between training and testing.
               </p>
             </div>
 
+            {/* 4. Test Accuracy & F1 */}
             <div className="border border-[#1a1a1a] bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="mono text-[11px] text-[#71717a]">Empirical Test Accuracy</span>
+                <span className="mono text-[11px] text-[#71717a]">Empirical Test Performance</span>
                 <span className="mono text-[10px] bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/30 px-2 py-0.5 font-bold">
                   HELD-OUT 20%
                 </span>
@@ -292,28 +314,10 @@ export const ResearchLabView: React.FC = () => {
                 <span className="mono text-2xl font-bold text-[#10b981]">
                   {(testSuite.metrics.accuracy * 100).toFixed(1)}%
                 </span>
-                <span className="text-xs text-[#71717a]">F1: {(testSuite.metrics.f1Score * 100).toFixed(1)}%</span>
+                <span className="text-xs text-[#71717a]">Accuracy</span>
               </div>
               <p className="mt-1 text-[11px] text-[#71717a]">
-                Passed {testSuite.summary.passedCount} of {testSuite.summary.totalTestSamples} unseen test samples and control baselines.
-              </p>
-            </div>
-
-            <div className="border border-[#1a1a1a] bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="mono text-[11px] text-[#71717a]">Inference Latency</span>
-                <span className="mono text-[10px] bg-[#2563eb]/10 text-[#2563eb] border border-[#2563eb]/30 px-2 py-0.5 font-bold">
-                  OPTIMIZED
-                </span>
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="mono text-2xl font-bold text-[#1a1a1a]">
-                  {testSuite.summary.averageLatencyMs} ms
-                </span>
-                <span className="text-xs text-[#71717a]">ROC-AUC: {testSuite.metrics.rocAuc}</span>
-              </div>
-              <p className="mt-1 text-[11px] text-[#71717a]">
-                Ensemble of channel priors, token log-odds, and regulatory vulnerability weights.
+                Precision: {(testSuite.metrics.precision * 100).toFixed(1)}% · Recall: {(testSuite.metrics.recall * 100).toFixed(1)}% · F1: {(testSuite.metrics.f1Score * 100).toFixed(1)}%
               </p>
             </div>
           </div>
